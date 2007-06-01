@@ -1,0 +1,63 @@
+Done:
+
+armor.c
+chase.c
+command.c
+daemon.c
+daemons.c
+fight.c
+init.c
+io.c
+list.c (in rogue.lisp)
+main.c
+misc.c
+move.c
+monsters.c
+newlevel.c
+options.c
+pack.c
+passages.c
+potions.c
+rings.c
+rooms.c
+rogue.h
+scrolls.c
+sticks.c
+things.c
+vers.c
+weapons.c?? (seems like I've actually done it already)
+wizard.c
+
+In Prog:
+
+rip.c (sorta done...)
+
+Must:
+
+Nope:
+
+machdep.h
+save.c
+state.c
+xcrypt.c
+
+TODO:
+
+* get save working
+** cleanup after load from .sav file:
+*** cur_armor
+*** cur_weapon
+*** oldrp?
+*** !!! does this really matter?  depends on how cur_weapon and cur_armor used.  oldrp isn't...
+
+* move "move" to cl-ncurses
+* whoami in init.lisp busted
+* XXX comment in monsters.lisp
+* make sure GET_STR is used correctly everywhere (mvb)
+* may be some places where incorrect trueness due to 0 not being "false" in Lisp
+* skipped expansion of "~" -> "home" in parse_opts
+* review use of "for" macro for off-by-one errors
+* look for places that need (format nil ...)
+* passwd() in wizard.c isn't ported, always returns t
+* 2 func in rip.c not ported
+* stuff like 'shell' in command.lisp not ported
