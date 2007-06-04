@@ -6,7 +6,7 @@
 (defun read_scroll ()
   (when-let (obj (get_item "read" SCROLL))
     (let ((which (object-o_which obj)))
-      (if (not (eq (object-o_type obj) SCROLL))
+      (if (not (eql (object-o_type obj) SCROLL))
           (progn
             (msg (if terse
                      "Nothing to read"
@@ -14,7 +14,7 @@
                  (return-from read_scroll))))
       (msg "As you read the scroll, it vanishes.")
       ;; Calculate the effect it has on the poor guy.
-      (when (eq obj cur_weapon)
+      (when (eql obj cur_weapon)
         (setf cur_weapon nil))
       (case which
         (#.S_CONFUSE
@@ -102,13 +102,13 @@
                    #.PASSAGE
                    #\Space
                    #.STAIRS)
-                  (unless (eq (rogue-mvwinch mw i j) #\Space)
+                  (unless (eql (rogue-mvwinch mw i j) #\Space)
                     (let ((it (find_mons i j)))
-                      (when (eq (thing-t_oldch it) #\Space)
+                      (when (eql (thing-t_oldch it) #\Space)
                         (setf (thing-t_oldch it) nch)))))
                  (otherwise
                   (setf nch #\Space)))
-               (unless (eq nch ch)
+               (unless (eql nch ch)
                  (rogue-waddch hw nch)))))
          ;; Copy in what he has discovered
          (cl-ncurses:overlay cw hw)
@@ -121,7 +121,7 @@
            (dotimes (i MAXROOMS)
              (incf gtotal (moor-r_goldval (aref rooms i)))
              (when (and (not (zerop (moor-r_goldval (aref rooms i))))
-                        (eq (rogue-mvwinch cl-ncurses:*stdscr*
+                        (eql (rogue-mvwinch cl-ncurses:*stdscr*
                                            (coord-y (moor-r_gold (aref rooms i)))
                                            (coord-x (moor-r_gold (aref rooms i))))
                             GOLD))
@@ -140,7 +140,7 @@
          ;; Make him dissapear and reappear
          (let ((cur_room (roomin hero))
                (rm (teleport)))
-           (when (not (eq cur_room (aref rooms rm)))
+           (when (not (eql cur_room (aref rooms rm)))
              (setf (aref s_know S_TELEP) t))))
         (#.S_ENCH
          (if (null cur_weapon)
@@ -191,7 +191,7 @@
          (msg (if terse "Call it: " "What do you want to call it? "))
          (multiple-value-bind (buf status)
              (get_str "" cw)
-           (when (eq status NORM)
+           (when (eql status NORM)
              (setf (aref s_guess which) (copy-seq buf))))))
       ;; Get rid of the thing
       (decf inpack)

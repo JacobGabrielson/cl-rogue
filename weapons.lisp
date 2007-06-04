@@ -1,5 +1,4 @@
 ;;;; Functions for dealing with problems brought about by weapons
-;;;;
 ;;;; @(#)weapons.c	3.17 (Berkeley) 6/15/81
 
 (in-package :cl-rogue)
@@ -39,32 +38,32 @@
   ;; Get which thing we are hurling
   (when-let (obj (get_item "throw" WEAPON))
     (symbol-macrolet ((obj->o_count (object-o_count obj)))
-      (when (or (not (dropcheck obj)) 
+      (when (or (not (dropcheck obj))
                 (is_current obj))
-        (return-from missile)
-        ;; Get rid of the thing.  If it is a non-multiple item object, or
-        ;; if it is the last thing, just drop it.  Otherwise, create a new
-        ;; item with a count of one.
-        (if (< obj->o_count 2)
-            (progn
-              (detach pack obj)
+        (return-from missile))
+      ;; Get rid of the thing.  If it is a non-multiple item object,
+      ;; or if it is the last thing, just drop it.  Otherwise, create
+      ;; a new item with a count of one.
+      (if (< obj->o_count 2)
+          (progn
+            (detach pack obj)
+            (decf inpack))
+          (progn
+            (decf obj->o_count)
+            (when (zerop (object-o_group obj))
               (decf inpack))
-            (progn
-              (decf obj->o_count)
-              (when (zerop (object-o_group obj))
-                (decf inpack))
-              (setf obj (copy-structure obj))
-              (setf obj->o_count 1)))
-        (do_motion obj ydelta xdelta)
-        ;; AHA! Here it has hit something.  If it is a wall or a door,
-        ;; or if it misses (combat) the mosnter, put it on the floor
-        (when (or (upper-case-p (rogue-mvwinch mw
-                                                     (coord-y (object-o_pos obj))
-                                                     (coord-x (object-o_pos obj))))
-                  (not (hit_monster (coord-y (object-o_pos obj)) 
-                                    (coord-x (object-o_pos obj)) obj)))
-          (fall obj t))
-        (rogue-mvwaddch cw hero.y hero.x PLAYER)))))
+            (setf obj (copy-structure obj))
+            (setf obj->o_count 1)))
+      (do_motion obj ydelta xdelta)
+      ;; AHA! Here it has hit something.  If it is a wall or a door,
+      ;; or if it misses (combat) the mosnter, put it on the floor
+      (when (or (upper-case-p (rogue-mvwinch mw
+                                             (coord-y (object-o_pos obj))
+                                             (coord-x (object-o_pos obj))))
+                (not (hit_monster (coord-y (object-o_pos obj)) 
+                                  (coord-x (object-o_pos obj)) obj)))
+        (fall obj t))
+      (rogue-mvwaddch cw hero.y hero.x PLAYER))))
 
 (defun do_motion (obj ydelta xdelta)
   "Do the actual motion on the screen done by an object traveling
@@ -77,24 +76,25 @@ across the room."
     (setf obj->o_pos hero)
     (loop
        ;; Erase the old one
-       (when (and (not (ce obj->o_pos hero)) 
+       (when (and (not (equalp obj->o_pos hero))
                   (cansee obj->o_pos.y obj->o_pos.x)
-                  (not (eq (rogue-mvwinch cw obj->o_pos.y obj->o_pos.x) #\Space)))
+                  (not (eql (rogue-mvwinch cw obj->o_pos.y obj->o_pos.x)
+                            #\Space)))
          (rogue-mvwaddch cw
-                               obj->o_pos.y
-                               obj->o_pos.x 
-                               (show obj->o_pos.y obj->o_pos.x)))
+                         obj->o_pos.y
+                         obj->o_pos.x 
+                         (show obj->o_pos.y obj->o_pos.x)))
        ;; Get the new position
        (incf obj->o_pos.y ydelta)
        (incf obj->o_pos.x xdelta)
        (let ((ch (winat obj->o_pos.y obj->o_pos.x)))
          (if (and (step_ok ch) 
-                  (not (eq ch DOOR)))
+                  (not (eql ch DOOR)))
              (progn
                ;; It hasn't hit anything yet, so display it
                ;; If it alright.
                (when (and (cansee obj->o_pos.y obj->o_pos.x)
-                          (not (eq (rogue-mvwinch cw obj->o_pos.y obj->o_pos.x) #\Space)))
+                          (not (eql (rogue-mvwinch cw obj->o_pos.y obj->o_pos.x) #\Space)))
                  (rogue-mvwaddch cw obj->o_pos.y obj->o_pos.x obj->o_type)
                  (draw cw)))
              (return-from do_motion))))))
@@ -159,7 +159,7 @@ across the room."
         (setf *after* nil)
         (return-from wield))
 
-      (when (eq (object-o_type obj) ARMOR)
+      (when (eql (object-o_type obj) ARMOR)
         (msg "You can't wield armor")
         (setf *after* nil)
         (return-from wield))
@@ -185,9 +185,9 @@ across the room."
         (unless (or (not (= y hero.y))
                     (not (= x hero.x)))
           (let ((ch (winat y x)))
-            (when (or (eq ch FLOOR) 
+            (when (or (eql ch FLOOR) 
                       (and passages 
-                           (eq ch PASSAGE)))
+                           (eql ch PASSAGE)))
               (incf cnt) 
               (when (zerop (rnd cnt))
                 (setf (coord-y newpos) y)

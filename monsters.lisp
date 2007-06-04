@@ -1,5 +1,4 @@
 ;;;; File with various monster functions in it
-;;;;
 ;;;; @(#)monsters.c	3.18 (Berkeley) 6/15/81
 
 (in-package :cl-rogue)
@@ -14,15 +13,14 @@ the monster."
   (let (d 
         (mons (if wander wand_mons lvl_mons)))
     (loop
-       (setf d (+ level 
-                  (- (rnd 10) 
-                     5)))
+       (setf d (+ level (- (rnd 10) 
+                           5)))
        (cond
          ((< d 1) (setf d (1+ (rnd 5))))
          ((> d 26) (setf d (+ (rnd 5) 22))))
        (decf d)
        (let ((mon (aref mons d)))
-         (when (not (eq mon #\Space))
+         (when (not (eql mon #\Space))
            (return-from randmonster mon))))))
 
 (defun new_monster (tp type cp)
@@ -44,7 +42,7 @@ the monster."
           (thing-t_pack tp) nil)
     (when (iswearing R_AGGR)
       (runto cp hero))
-    (when (eq type #\M)
+    (when (eql type #\M)
       (setf (thing-t_disguise tp)
             (if (thing-t_pack tp)
                 (object-o_type (car (thing-t_pack tp)))
@@ -72,15 +70,15 @@ the monster."
         (cp (make-coord)))
     (loop
        (setf i (rnd_room))
-       (when (not (eq (setf rp (aref rooms i)) hr))
+       (when (not (eql (setf rp (aref rooms i)) hr))
          (rnd_pos rp cp)
          (setf ch (rogue-mvwinch cl-ncurses:*stdscr* (coord-y cp) (coord-x cp)))
-         (when (eq ch 'err)   ; XXX: figure out what ERR is in c world
+         (when (eql ch 'err)   ; XXX: figure out what ERR is in c world
            (rogue-debug "Routine wanderer: mvwinch failed to ~d,~d" (coord-y cp) (coord-x cp))
            (wait_for #\Newline)
            (return-from wanderer))
          (when (and
-                (not (eq hr rp))
+                (not (eql hr rp))
                 (step_ok ch))
            (return))))
     (new_monster tp (randmonster t) cp)
@@ -105,7 +103,7 @@ the monster."
       (setf (thing-t_dest tp) hero
             (thing-t_flags tp) (logior (thing-t_flags tp) ISRUN))
 
-      (when (and (eq ch #\U) 
+      (when (and (eql ch #\U) 
                  (off *player* ISBLIND))
         (setf rp (roomin hero))
         (when (or
@@ -140,7 +138,7 @@ the monster."
       (addmsg " do you wish to wipe out"))
     (msg "? ")
     (while (not (alpha-char-p (setf c (readchar))))
-      (if (eq c #\Escape)
+      (if (eql c #\Escape)
           (return-from genocide)
           (progn
             (zero! mpos)
@@ -154,7 +152,7 @@ the monster."
          mlist)
     (setf mlist (remove c mlist :key #'thing-t_type))
     (dotimes (i (length lvl_mons))
-      (when (eq (aref lvl_mons i) c)
+      (when (eql (aref lvl_mons i) c)
         (setf (aref lvl_mons i) #\Space)
         (setf (aref wand_mons i) #\Space)
         (return)))))

@@ -30,7 +30,7 @@
         (for (y (1- (coord-y oldpos)) (1+ (coord-y oldpos)))
           (when (and (or (not (= y hero.y))
                          (not (= x hero.x)))
-                     (eq (show y x) FLOOR))
+                     (eql (show y x) FLOOR))
             (rogue-mvwaddch cw y x #\Space)))))
     (setf rp (roomin hero)
           inpass (null rp)
@@ -47,20 +47,20 @@
                 (let ((tp (if wakeup
                               (wake_monster y x)
                               (find_mons y x))))
-                  (when (eq (setf (thing-t_oldch tp) (rogue-mvinch y x))
+                  (when (eql (setf (thing-t_oldch tp) (rogue-mvinch y x))
                             TRAP)
                     (setf (thing-t_oldch tp)
                           (if (logtest (rogue-trap-tr_flags (trap_at y x)) ISFOUND) 
                               TRAP
                               FLOOR)))
-                  (when (and (eq (thing-t_oldch tp) FLOOR)
+                  (when (and (eql (thing-t_oldch tp) FLOOR)
                              (logtest (moor-r_flags rp) ISDARK)
                              (off *player* ISBLIND))
                     (setf (thing-t_oldch tp) #\Space))))
               ;;
               ;; Secret doors show as walls
               ;;
-              (when (eq (setf ch (show y x)) SECRETDOOR)
+              (when (eql (setf ch (show y x)) SECRETDOOR)
                 (setf ch (secretdoor y x)))
               ;;
               ;; Don't show room walls if he is in a passage
@@ -69,8 +69,8 @@
                   (if (or (and (= y hero.y) 
                                (= x hero.x))
                           (and inpass 
-                               (or (eq ch #\-) 
-                                   (eq ch #\|))))
+                               (or (eql ch #\-) 
+                                   (eql ch #\|))))
                       (return-from continue))
                   (when (or (not (= y hero.y)) 
                             (not (= x hero.x)))
@@ -144,7 +144,7 @@
 (defun eat ()
   "She wants to eat something, so let her try."
   (when-let (obj (get_item "eat" FOOD))
-    (when (not (eq (object-o_type obj) FOOD))
+    (when (not (eql (object-o_type obj) FOOD))
       (if terse
           (msg "That's Inedible!")
           (msg "Ugh, you would get ill if you ate that."))
@@ -161,7 +161,7 @@
     (when (> (+ (incf food_left HUNGERTIME) (rnd 400) (- 200)) STOMACHSIZE)
       (setf food_left STOMACHSIZE))
     (setf hungry_state 0)
-    (when (eq obj cur_weapon)
+    (when (eql obj cur_weapon)
       (setf cur_weapon nil))
     (when (< (decf (object-o_count obj)) 1)
       (detach pack obj))))
@@ -242,10 +242,10 @@ highest it has been, just in case."
 (defun is_current (obj)
   "See if the object is one of the currently used items."
   (when obj
-    (when (or (eq obj cur_armor) 
-              (eq obj cur_weapon) 
-              (eq obj (aref cur_ring LEFT))
-              (eq obj (aref cur_ring RIGHT)))
+    (when (or (eql obj cur_armor)
+              (eql obj cur_weapon)
+              (eql obj (aref cur_ring LEFT))
+              (eql obj (aref cur_ring RIGHT)))
       (msg (if terse "In use." "That's already in use."))
       t)))
 

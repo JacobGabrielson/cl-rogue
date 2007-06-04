@@ -117,13 +117,13 @@ inventory."
         (otherwise
          (rogue-debug "Picked up something funny")
          (format prbuf "Something bizarre ~a" (unctrl-char obj->o_type))))
-      (when (eq obj cur_armor)
+      (when (eql obj cur_armor)
         (format prbuf " (being worn)"))
-      (when (eq obj cur_weapon)
+      (when (eql obj cur_weapon)
         (format prbuf " (weapon in hand)"))
-      (if (eq obj (aref cur_ring LEFT))
+      (if (eql obj (aref cur_ring LEFT))
           (format prbuf " (on left hand)")
-          (when (eq obj (aref cur_ring RIGHT))
+          (when (eql obj (aref cur_ring RIGHT))
             (format prbuf " (on right hand)")))
       (if (and drop
                (upper-case-p (aref prstring 0)))
@@ -141,7 +141,7 @@ inventory."
   "Add to characters purse."
   (map nil
        #'(lambda (rp)
-           (when (ce hero (moor-r_gold rp))
+           (when (equalp hero (moor-r_gold rp))
              (when notify
                (verbose "You found ")
                (msg "~d gold pieces." (moor-r_goldval rp)))
@@ -156,8 +156,8 @@ inventory."
 (defun drop ()
   "Put something down."
   (let ((ch (rogue-mvwinch cl-ncurses:*stdscr* hero.y hero.x)))
-    (when (and (not (eq ch FLOOR))
-               (not (eq ch PASSAGE)))
+    (when (and (not (eql ch FLOOR))
+               (not (eql ch PASSAGE)))
       (msg "There is something there already")
       (return-from drop))
     (when-let (op (get_item "drop" nil))
@@ -165,7 +165,7 @@ inventory."
         (return-from drop))
       ;; Take it out of the pack
       (if (and (>1 (object-o_count op))
-               (not (eq (object-o_type op) WEAPON)))
+               (not (eql (object-o_type op) WEAPON)))
           (progn
             (let ((nobj (copy-structure op)))
               (decf (object-o_count op))
@@ -185,23 +185,23 @@ inventory."
   "Do special checks for dropping or unweilding|unwearing|unringing."
   (unless op
     (return-from dropcheck t))
-  (when (and (not (eq op cur_armor))
-             (not (eq op cur_weapon))
-             (not (eq op (aref cur_ring LEFT)))
-             (not (eq op (aref cur_ring RIGHT))))
+  (when (and (not (eql op cur_armor))
+             (not (eql op cur_weapon))
+             (not (eql op (aref cur_ring LEFT)))
+             (not (eql op (aref cur_ring RIGHT))))
     (return-from dropcheck t))
   (when (logtest (object-o_flags op) ISCURSED)
     (msg "You can't.  It appears to be cursed.")
     (return-from dropcheck nil))
   (cond
-    ((eq op cur_weapon)
+    ((eql op cur_weapon)
      (setf cur_weapon nil))
-    ((eq op cur_armor)
+    ((eql op cur_armor)
      (waste_time)
      (setf cur_armor nil))
     ((or
-      (eq op (aref cur_ring LEFT))
-      (eq op (aref cur_ring RIGHT)))
+      (eql op (aref cur_ring LEFT))
+      (eql op (aref cur_ring RIGHT)))
      (case (object-o_which op)
        (#.R_ADDSTR
         (let ((save_max (stats-s_str max_stats)))
@@ -213,7 +213,7 @@ inventory."
         (light hero)
         (rogue-mvwaddch cw hero.y hero.x PLAYER)))
      (setf (aref cur_ring 
-                 (if (eq op (aref cur_ring LEFT))
+                 (if (eql op (aref cur_ring LEFT))
                      LEFT RIGHT))
            nil)))
   t)

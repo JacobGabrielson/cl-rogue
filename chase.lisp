@@ -27,14 +27,14 @@
         sch
         (this (thing-t_dest th)))  ; temporary destination for chaser 
     ;; We don't count doors as inside rooms for this routine
-    (when (eq (rogue-mvwinch cl-ncurses:*stdscr* (coord-y (thing-t_pos th)) (coord-x (thing-t_pos th)))
+    (when (eql (rogue-mvwinch cl-ncurses:*stdscr* (coord-y (thing-t_pos th)) (coord-x (thing-t_pos th)))
               DOOR)
       (setf rer nil))
     ;; If the object of our desire is in a different room than we are,
     ;; and we are not in a corridor, run to the door nearest to our
     ;; goal.
     (when (and rer 
-               (not (eq rer ree)))
+               (not (eql rer ree)))
       (for (i 0 (1- (moor-r_nexits rer))) ; loop through doors 
         (setf dist (distance (coord-y (thing-t_dest th))
                              (coord-x (thing-t_dest th))
@@ -46,11 +46,11 @@
     ;; THIS now contains what we want to run to this time so we run to
     ;; it.  If we hit it we either want to fight it or stop running.
     (if (not (chase th this))
-        (if (ce this hero)
+        (if (equalp this hero)
             (return-from do_chase (attack th))
-            (unless (eq (thing-t_type th) #\F)
+            (unless (eql (thing-t_type th) #\F)
               (setf stoprun t)))
-        (when (eq (thing-t_type th) #\F)
+        (when (eql (thing-t_type th) #\F)
           (return-from do_chase 0)))
     (rogue-mvwaddch cw
                     (coord-y (thing-t_pos th))
@@ -59,7 +59,7 @@
     (setf sch (rogue-mvwinch cw (coord-y ch_ret) (coord-x ch_ret)))
     (if (and rer
              (logtest (moor-r_flags rer) ISDARK)
-             (eq sch FLOOR)
+             (eql sch FLOOR)
              (< (distance (coord-y ch_ret) 
                           (coord-x ch_ret) 
                           (coord-y (thing-t_pos th)) 
@@ -80,7 +80,7 @@
     (setf (thing-t_pos th) ch_ret)
     ;; And stop running if need be.
     (when (and stoprun
-               (ce (thing-t_pos th) (thing-t_dest th)))
+               (equalp (thing-t_pos th) (thing-t_dest th)))
       (logclr! (thing-t_flags th) ISRUN))
     0))
 
@@ -110,9 +110,9 @@ FALSE if we reach the goal."
     (if (or 
          (and (on tp ISHUH)
               (< (rnd 10) 8))
-         (and (eq (thing-t_type tp) #\I) 
+         (and (eql (thing-t_type tp) #\I) 
               (< (rnd 100) 20))
-         (and (eq (thing-t_type tp) #\B) 
+         (and (eql (thing-t_type tp) #\B) 
               (< (rnd 100) 50)))
         ;; Get a valid random move
         (progn
@@ -141,12 +141,12 @@ FALSE if we reach the goal."
                     (when (step_ok ch)
                       ;; If it is a scroll, it might be a scare monster scroll
                       ;; so we need to look it up to see what type it is.
-                      (when (or (not (eq ch SCROLL))
+                      (when (or (not (eql ch SCROLL))
                                 (not (find-if
                                       #'(lambda (obj)
                                           (and (= y (coord-y (object-o_pos obj)))
                                                (= x (coord-x (object-o_pos obj)))
-                                               (eq (object-o_which obj) S_SCARE)))
+                                               (eql (object-o_which obj) S_SCARE)))
                                       lvl_obj)))
                         ;; If we didn't find any scrolls at this place or it
                         ;; wasn't a scare scroll, then this place counts
@@ -186,7 +186,7 @@ in any room."
       ;; We can only see if the hero in the same room as the
       ;; coordinate and the room is lit or if it is close.
       (or (and rer
-               (eq rer (roomin hero))
+               (eql rer (roomin hero))
                (not (logtest (moor-r_flags rer) ISDARK)))
           (< (distance y x hero.y hero.x)
              3)))))

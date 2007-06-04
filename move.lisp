@@ -39,12 +39,12 @@ consequences (fighting, picking up, etc."
     (return-from do_move))
 
   (when (and running 
-             (ce hero nh))
+             (equalp hero nh))
     (setf *after* nil
           running nil))
   (let ((ch (winat (coord-y nh) (coord-x nh))))
     (when (and (on *player* ISHELD) 
-               (not (eq ch #\F)))
+               (not (eql ch #\F)))
       (msg "You are being held")
       (return-from do_move))
     (case ch
@@ -63,14 +63,14 @@ consequences (fighting, picking up, etc."
              take ch)))
 
     (cond
-      ((and (eq ch PASSAGE) 
-            (eq (winat hero.y hero.x) DOOR))
+      ((and (eql ch PASSAGE) 
+            (eql (winat hero.y hero.x) DOOR))
        (light hero))
-      ((eq ch DOOR)
+      ((eql ch DOOR)
        (setf running nil)
-       (when (eq (winat hero.y hero.x) PASSAGE)
+       (when (eql (winat hero.y hero.x) PASSAGE)
          (light nh)))
-      ((eq ch STAIRS)
+      ((eql ch STAIRS)
        (setf running nil))
       ((upper-case-p ch)
        (setf running nil)
@@ -99,7 +99,7 @@ that might move."
                  (darkp (logtest (moor-r_flags rp) ISDARK)))
             (cl-ncurses::wmove cw dy dx)
             ;; Figure out how to display a secret door.
-            (when (eq ch SECRETDOOR)
+            (when (eql ch SECRETDOOR)
               (setf ch
                     (if (or (zerop j)
                             (= j (1- (coord-y (moor-r_max rp)))))
@@ -110,7 +110,7 @@ that might move."
             ;; move).
             (when (upper-case-p ch)
               (let ((item (wake_monster dy dx)))
-                (when (and (eq (thing-t_oldch item) #\Space)
+                (when (and (eql (thing-t_oldch item) #\Space)
                            (not darkp))
                   (setf (thing-t_oldch item) (rogue-mvwinch 
                                               cl-ncurses:*stdscr* 
@@ -143,7 +143,7 @@ un-initiated."
        (let ((tp (find_mons y x)))
          (unless tp
            (msg "Can't find monster in show"))
-         (if (eq ch #\M)
+         (if (eql ch #\M)
              (thing-t_disguise tp)
              (when (off *player* CANSEE)
                ;; Hide invisible monsters
@@ -247,9 +247,9 @@ un-initiated."
                   (let ((dest (make-coord :y y :x x)))
                     (when (diag_ok (thing-t_pos who) 
                                    dest)
-                      (when (eq ch SCROLL)
+                      (when (eql ch SCROLL)
                         (when-let (obj (object-at y x))
-                          (when (eq (object-o_which obj) S_SCARE)
+                          (when (eql (object-o_which obj) S_SCARE)
                             (return-from continue)))))
                     (when (zerop (rnd (incf nopen)))
                       (setf ret dest))))))))))

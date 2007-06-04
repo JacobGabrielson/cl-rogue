@@ -12,8 +12,8 @@
         (endmsg)
         (setf *after* nil))
       (when-let (obj (get_item "wear" ARMOR))
-        (if (not (eq (object-o_type obj)
-                     ARMOR))
+        (if (not (eql (object-o_type obj)
+                      ARMOR))
             (msg "You can't wear that.")
             (progn
               (waste_time)

@@ -168,7 +168,7 @@
         (decf distance))
       (incf (coord-x curr) delta.x)
       (incf (coord-y curr) delta.y)
-      (unless (ce curr epos)
+      (unless (equalp curr epos)
         (msg "Warning, connectivity problem on this level.")))))
 
 (defun add-door (rm cp)

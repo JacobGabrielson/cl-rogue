@@ -13,7 +13,7 @@
 (defun ring_on ()
   (when-let (obj (get_item "put on" RING))
     ;; Make certain that it is somethings that we want to wear
-    (unless (eq (object-o_type obj) RING)
+    (unless (eql (object-o_type obj) RING)
       (if terse
           (msg "Not a ring")
           (msg "It would be difficult to wrap that around a finger"))
@@ -65,7 +65,7 @@
          (zero! mpos)
          (msg (if terse "Call it: " "What do you want to call it? "))
          (let ((buf ""))
-           (when (eq (get_str buf cw) NORM)
+           (when (eql (get_str buf cw) NORM)
              (setf (aref r_guess (object-o_which obj)) buf)))
          (msg ""))))))
 

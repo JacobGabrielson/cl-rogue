@@ -19,8 +19,8 @@
     (setf quiet 0)
     (runto mp hero)
     ;; Let him know it was really a mimic (if it was one).
-    (when (and (eq (thing-t_type tp) #\M)
-               (not (eq (thing-t_disguise tp) #\M))
+    (when (and (eql (thing-t_type tp) #\M)
+               (not (eql (thing-t_disguise tp) #\M))
                (off *player* ISBLIND))
       (msg "Wait! That's a mimic!")
       (setf (thing-t_disguise tp) #\M)  ;
@@ -54,7 +54,7 @@
   (setf running nil)
   (setf quiet 0)
 
-  (when (and (eq (thing-t_type mp) #\M)
+  (when (and (eql (thing-t_type mp) #\M)
              (off *player* ISBLIND))
     (setf (thing-t_disguise mp) #\M))
 
@@ -65,7 +65,7 @@
         (mstats (thing-t_stats mp)))
     (if (roll_em mstats pstats nil nil)
         (progn
-          (unless (eq mtype #\E)
+          (unless (eql mtype #\E)
             (hit mname nil))
           (when (<= (stats-s_hpt pstats) 0)
             (death mtype))              ; Bye bye life ... 
@@ -150,8 +150,8 @@
                      (nobj 0))
                  (map nil
                       #'(lambda (o)
-                          (when (and (not (eq o cur_armor))
-                                     (not (eq o cur_weapon))
+                          (when (and (not (eql o cur_armor))
+                                     (not (eql o cur_weapon))
                                      (is_magic o)
                                      (zerop (rnd (incf nobj))))
                             (setf obj o)))
@@ -173,8 +173,8 @@
                          (detach pack obj)))
                    (decf inpack)))))))
         ;; else of roll_em clause
-        (unless (eq (thing-t_type mp) #\E)
-          (when (eq (thing-t_type mp) #\F)
+        (unless (eql (thing-t_type mp) #\E)
+          (when (eql (thing-t_type mp) #\F)
             (decf (stats-s_hpt pstats) fung_hit)
             (when (<= (stats-s_hpt pstats) 0)
               (death #\F)))             ; Bye bye life ... 
@@ -230,7 +230,7 @@
       (hurl
        (if (and (logtest (object-o_flags weap) ISMISL)
                 cur_weapon
-                (eq (object-o_which cur_weapon) (object-o_launch weap)))
+                (eql (object-o_which cur_weapon) (object-o_launch weap)))
            (progn
              (setf cp (object-o_hurldmg weap))
              (setf prop_hplus (object-o_hplus cur_weapon))
@@ -241,8 +241,8 @@
       (t
        (setf cp (object-o_damage weap))
        ;; Drain a staff of striking
-       (when (and (eq (object-o_type weap) STICK)
-                  (eq (object-o_which weap) WS_HIT)
+       (when (and (eql (object-o_type weap) STICK)
+                  (eql (object-o_which weap) WS_HIT)
                   (zerop (object-o_charges weap)))
          (setf (object-o_damage weap) "0d0"
                (object-o_hplus weap) 0
@@ -251,7 +251,7 @@
        (let (damage
              (hplus (+ prop_hplus (if weap (object-o_hplus weap) 0)))
              (dplus (+ prop_dplus (if weap (object-o_dplus weap) 0))))
-         (when (eq weap cur_weapon)
+         (when (eql weap cur_weapon)
            (cond
              ((isring LEFT R_ADDDAM)
               (incf dplus (object-o_ac (aref cur_ring LEFT))))
@@ -263,7 +263,7 @@
               (incf hplus (object-o_ac (aref cur_ring RIGHT))))))
          (multiple-value-bind (ndice nsides) (parse-dice cp)
            (when nsides
-             (if (eq def pstats)
+             (if (eql def pstats)
                  (progn
                    (setf def_arm
                          (if cur_armor
@@ -377,13 +377,13 @@
 
 (defun thunk (weap mname)
   "A missile hits a monster."
-  (if (eq (object-o_type weap) WEAPON)
+  (if (eql (object-o_type weap) WEAPON)
       (msg "The ~a hits the ~a" (aref w_names (object-o_which weap)) mname)
       (msg "You hit the ~a." mname)))
 
 (defun bounce (weap mname)
   "A missile misses a monster."
-  (if (eq (object-o_type weap) WEAPON)
+  (if (eql (object-o_type weap) WEAPON)
       (msg "The ~a misses the ~a" (aref w_names (object-o_which weap)) mname)
       (msg "You missed the ~a." mname)))
 
@@ -397,7 +397,7 @@
   "Returns true if an object radiates magic."
   (case (object-o_type obj)
     (#.ARMOR 
-     (not (eq 
+     (not (eql
            (object-o_ac obj) 
            (aref a_class (object-o_which obj)))))
     (#.WEAPON

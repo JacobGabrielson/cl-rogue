@@ -23,7 +23,7 @@
   (let ((stair (make-coord)))
     (loop
        (rnd_pos (aref rooms (rnd_room)) stair)
-       (when (eq (winat (coord-y stair) (coord-x stair)) FLOOR)
+       (when (eql (winat (coord-y stair) (coord-x stair)) FLOOR)
          (return)))
     (rogue-addch STAIRS)
 
@@ -34,7 +34,7 @@
                      MAXTRAPS))
       (loop
          (rnd_pos (aref rooms (rnd_room)) STAIR)
-         (when (eq (winat (coord-y stair) (coord-x stair)) FLOOR)
+         (when (eql (winat (coord-y stair) (coord-x stair)) FLOOR)
            (return)))
       (let ((ch (aref 
                  (vector TRAPDOOR BEARTRAP SLEEPTRAP ARROWTRAP TELTRAP DARTTRAP)
@@ -46,7 +46,7 @@
 
     (loop
        (rnd_pos (aref rooms (rnd_room)) hero)
-       (when (eq (winat hero.y hero.x) FLOOR)
+       (when (eql (winat hero.y hero.x) FLOOR)
          (return)))
     (light hero)
     (cl-ncurses:wmove cw hero.y hero.x)
@@ -81,7 +81,7 @@
               (tp (make-coord)))
           (loop
              (rnd_pos (aref rooms rm) tp)
-             (when (eq (winat (coord-y tp) (coord-x tp))
+             (when (eql (winat (coord-y tp) (coord-x tp))
                        FLOOR)
                (return)))
           (rogue-mvaddch (coord-y tp) (coord-x tp) (object-o_type cur))
@@ -104,7 +104,7 @@
             (tp (make-coord)))
         (loop
            (rnd_pos (aref rooms rm) tp)
-           (when (eq (winat (coord-y tp) (coord-x tp)) FLOOR)
+           (when (eql (winat (coord-y tp) (coord-x tp)) FLOOR)
              (return)))
         (rogue-mvaddch (coord-y tp) (coord-x tp) (object-o_type cur))
         (setf (object-o_pos cur) tp)))))

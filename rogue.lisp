@@ -228,12 +228,6 @@
      (* (- y2 y1) 
         (- y2 y1))))
 
-(defun ce (a b)
-  (and (= (coord-x a)
-          (coord-x b))
-       (= (coord-y a)
-          (coord-y b))))
-
 (defun draw (window)
   (cl-ncurses:wrefresh window))
 

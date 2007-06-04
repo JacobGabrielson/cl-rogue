@@ -29,7 +29,7 @@
 
 (defun do_zap (gotdir)
   (when-let (obj (get_item "zap with" STICK))
-    (when (not (eq (object-o_type obj) STICK))
+    (when (not (eql (object-o_type obj) STICK))
       (msg "You can't zap with that!")
       (setf *after* nil)
       (return-from do_zap))
@@ -87,7 +87,7 @@
            (let* ((monster (rogue-mvwinch mw y x))
                   (omonst monster))
              (when (upper-case-p monster)
-               (when (eq monster #\F)
+               (when (eql monster #\F)
                  (logclr! (thing-t_flags *player*) ISHELD))
                (let ((tp (find_mons y x)))
                  (case which
@@ -105,7 +105,7 @@
                       (setf (thing-t_oldch tp) oldch)
                       (setf (aref ws_know WS_POLYMORPH)
                             (or (aref ws_know WS_POLYMORPH)
-                                (not (eq monster omonst))))))
+                                (not (eql monster omonst))))))
                    (#.WS_CANCEL
                     (logior! (thing-t_flags tp) ISCANC)
                     (logclr! (thing-t_flags tp) ISINVIS))
@@ -115,7 +115,7 @@
                        (loop
                           (rnd_pos (aref rooms (rnd_room))
                                    (thing-t_pos tp))
-                          (when (eq (winat (coord-y (thing-t_pos tp))
+                          (when (eql (winat (coord-y (thing-t_pos tp))
                                            (coord-x (thing-t_pos tp)))
                                     FLOOR))))
                       (otherwise
@@ -130,9 +130,9 @@
                                     (coord-y (thing-t_pos tp))
                                     (coord-x (thing-t_pos tp))
                                     monster)
-                    (when (or (not (eq (coord-y (thing-t_pos tp))
+                    (when (or (not (eql (coord-y (thing-t_pos tp))
                                        y))
-                              (not (eq (coord-x (thing-t_pos tp))
+                              (not (eql (coord-x (thing-t_pos tp))
                                        x)))
                       (setf (thing-t_oldch tp)
                             (rogue-mvwinch cw
@@ -172,7 +172,7 @@
              (incf x delta.x))
            (when (upper-case-p (rogue-mvwinch mw y x))
              (let ((tp (find_mons y x)))
-               (if (eq which WS_HASTE_M)
+               (if (eql which WS_HASTE_M)
                    (if (on tp ISSLOW)
                        (logclr! (thing-t_flags tp) ISSLOW)
                        (logior! (thing-t_flags tp) ISHASTE))
@@ -226,8 +226,8 @@
                              (setf (object-o_pos *ray*) pos)
                              (hit_monster pos.y pos.x *ray*)
                              (setf used t))
-                           (if (or (not (eq ch #\M))
-                                   (eq (show pos.y pos.x) #\M))
+                           (if (or (not (eql ch #\M))
+                                   (eql (show pos.y pos.x) #\M))
                                (progn
                                  (if terse
                                      (msg "~a misses" name)

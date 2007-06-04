@@ -59,7 +59,7 @@ CW.")
 getchar."
   (let ((c (cl-ncurses:wgetch (or *input-window* cw))))
     (cond
-      ((eq c cl-ncurses:err) nil)
+      ((eql c cl-ncurses:err) nil)
       (t (code-char c)))))
 
 (let ((buf "")

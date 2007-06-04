@@ -243,7 +243,7 @@
   (msg "Really quit?")
   (draw cw)
   (cond
-    ((eq (readchar) #\y)
+    ((eql (readchar) #\y)
      (cl-ncurses:clear)
      (cl-ncurses:move (1- cl-ncurses:*lines*) 0)
      (draw cl-ncurses:*stdscr*)
@@ -274,7 +274,7 @@
            (rogue-mvaddch y x DOOR)
            (setf *count* 0)))
         (#.TRAP
-         (unless (or (eq (rogue-mvwinch cw y x) TRAP)
+         (unless (or (eql (rogue-mvwinch cw y x) TRAP)
                      (> (rnd 100) 50))
            (let ((tp (trap_at y x)))
              (logior! (rogue-trap-tr_flags tp) ISFOUND)
@@ -292,7 +292,7 @@
     ;; If it's not a *, print the right help string
     ;; or an error if he typed a funny character.
     ;;
-    (unless (eq helpch #\*)
+    (unless (eql helpch #\*)
       (cl-ncurses:wmove cw 0 0)
       (let ((help-description (cdr (assoc helpch helpstr))))
         (if help-description
@@ -329,7 +329,7 @@
   (msg "What do you want identified? ")
   (let ((ch (readchar)))
     (setf mpos 0)
-    (when (eq ch #\Escape)
+    (when (eql ch #\Escape)
       (msg "")
       (return-from identify))
     (msg
@@ -359,7 +359,7 @@
 
 (defun d_level ()
   "He wants to go down a level."
-  (if (not (eq (winat hero.y hero.x) STAIRS))
+  (if (not (eql (winat hero.y hero.x) STAIRS))
       (msg "I see no way down.")
       (progn
         (incf level)
@@ -367,7 +367,7 @@
 
 (defun u_level ()
   "He wants to go up a level."
-  (if (and (eq (winat hero.y hero.x) STAIRS)
+  (if (and (eql (winat hero.y hero.x) STAIRS)
            amulet)
       (progn
         (decf level)
@@ -475,5 +475,5 @@
           (msg "What do you want to call it? "))
       (multiple-value-bind (opt status)
           (get_str elsewise cw)
-        (when (eq status NORM)
+        (when (eql status NORM)
           (setf (aref guess (object-o_which obj)) opt))))))

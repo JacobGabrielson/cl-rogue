@@ -10,13 +10,13 @@
     ;;
     (unless obj
       (return-from quaff))
-    (unless (eq (object-o_type obj) POTION)
+    (unless (eql (object-o_type obj) POTION)
       (msg (if terse
                "That's undrinkable" 
                "Yuk! Why would you want to drink that?"))
       (return-from quaff))
 
-    (if (eq obj cur_weapon)
+    (if (eql obj cur_weapon)
         (setf cur_weapon nil))
 
     ;;
@@ -147,7 +147,7 @@
                (not (aref p_guess (object-o_which obj))))
           (msg (if terse "Call it: " "What do you want to call it? "))
           (let ((buf ""))
-            (when (eq (get_str buf cw) NORM)
+            (when (eql (get_str buf cw) NORM)
               (setf (aref p_guess (object-o_which obj)) buf)))))
     ;;
     ;; Throw the item away

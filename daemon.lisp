@@ -27,8 +27,8 @@
 (defun find_slot (func)
   "Find a particular slot in the table."
   (find-if #'(lambda (x) 
-               (and (not (eq (delayed_action-d_type x) EMPTY))
-                    (eq (delayed_action-d_func x) func)))
+               (and (not (eql (delayed_action-d_type x) EMPTY))
+                    (eql (delayed_action-d_func x) func)))
            d_list))
 
 (defun daemon (func arg type)
@@ -50,8 +50,8 @@
 passing the argument to the function."
   (map nil 
        #'(lambda (d)
-           (when (and (eq (delayed_action-d_type d) flag) 
-                      (eq (delayed_action-d_time d) DAEMON))
+           (when (and (eql (delayed_action-d_type d) flag) 
+                      (eql (delayed_action-d_time d) DAEMON))
              (funcall (delayed_action-d_func d) (delayed_action-d_arg d))))
        d_list))
 
@@ -77,7 +77,7 @@ passing the argument to the function."
   "Decrement counters and start needed fuses."
   (map nil
        #'(lambda (wire)
-           (when (and (eq flag (delayed_action-d_type wire))
+           (when (and (eql flag (delayed_action-d_type wire))
                       (plusp (delayed_action-d_time wire))
                       (zerop (decf (delayed_action-d_time wire))))
              ;; Decrementing counters and starting things we want.  We also need
