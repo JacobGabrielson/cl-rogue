@@ -90,7 +90,8 @@ running (for when it dies)."
   (let ((tp (find_mons (coord-y runner) (coord-x runner))))
     ;; If we couldn't find him, something is funny
     (when (null tp)
-      (msg "CHASER '~a'" (unctrl-char (winat (coord-y runner) (coord-x runner)))))
+      (msg "CHASER '~a'" (unctrl-char (winat (coord-y runner) (coord-x runner))))
+      (rogue-done))
     ;; Start the beastie running
     (setf (thing-t_dest tp) spot)
     (logior! (thing-t_flags tp) ISRUN)

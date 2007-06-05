@@ -56,11 +56,11 @@
             (setf obj->o_count 1)))
       (do_motion obj ydelta xdelta)
       ;; AHA! Here it has hit something.  If it is a wall or a door,
-      ;; or if it misses (combat) the mosnter, put it on the floor
-      (when (or (upper-case-p (rogue-mvwinch mw
-                                             (coord-y (object-o_pos obj))
-                                             (coord-x (object-o_pos obj))))
-                (not (hit_monster (coord-y (object-o_pos obj)) 
+      ;; or if it misses (combat) the monster, put it on the floor
+      (when (or (not (upper-case-p (rogue-mvwinch mw
+                                                  (coord-y (object-o_pos obj))
+                                                  (coord-x (object-o_pos obj)))))
+                (not (hit_monster (coord-y (object-o_pos obj))
                                   (coord-x (object-o_pos obj)) obj)))
         (fall obj t))
       (rogue-mvwaddch cw hero.y hero.x PLAYER))))
@@ -73,7 +73,9 @@ across the room."
                     (obj->o_type (object-o_type obj))
                     (obj->o_pos.x (coord-x (object-o_pos obj)))
                     (obj->o_pos.y (coord-y (object-o_pos obj))))
-    (setf obj->o_pos hero)
+    ;; COPY-STRUCTURE needed to avoid moving the player!
+    (setf obj->o_pos (copy-structure hero))
+
     (loop
        ;; Erase the old one
        (when (and (not (equalp obj->o_pos hero))
@@ -91,10 +93,11 @@ across the room."
          (if (and (step_ok ch) 
                   (not (eql ch DOOR)))
              (progn
-               ;; It hasn't hit anything yet, so display it
-               ;; If it alright.
+               ;; It hasn't hit anything yet, so display it if it's
+               ;; alright.
                (when (and (cansee obj->o_pos.y obj->o_pos.x)
-                          (not (eql (rogue-mvwinch cw obj->o_pos.y obj->o_pos.x) #\Space)))
+                          (not (eql (rogue-mvwinch cw obj->o_pos.y obj->o_pos.x) 
+                                    #\Space)))
                  (rogue-mvwaddch cw obj->o_pos.y obj->o_pos.x obj->o_type)
                  (draw cw)))
              (return-from do_motion))))))
@@ -175,21 +178,20 @@ across the room."
       (setf cur_weapon obj))))
 
 (defun fallpos (pos newpos passages)
-  "Pick a random position around the give (y, x) coordinates."
+  "Pick a random position around the given (y, x) coordinates."
   (let ((cnt 0))
     (for (y (1- (coord-y pos)) (1+ (coord-y pos)))
       (for (x (1- (coord-x pos)) (1+ (coord-x pos)))
-        ;; check to make certain the spot is empty, if it is,
-        ;; put the object there, set it in the level list
-        ;; and re-draw the room if he can see it
-        (unless (or (not (= y hero.y))
-                    (not (= x hero.x)))
+        ;; Check to make certain the spot is empty, if it is, put the
+        ;; object there, set it in the level list and re-draw the room
+        ;; if he can see it.
+        (unless (and (= y hero.y) (= x hero.x))
           (let ((ch (winat y x)))
-            (when (or (eql ch FLOOR) 
-                      (and passages 
+            (when (or (eql ch FLOOR)
+                      (and passages
                            (eql ch PASSAGE)))
-              (incf cnt) 
+              (incf cnt)
               (when (zerop (rnd cnt))
-                (setf (coord-y newpos) y)
-                (setf (coord-x newpos) x)))))))
+                (setf (coord-y newpos) y
+                      (coord-x newpos) x)))))))
     (nonzerop cnt)))

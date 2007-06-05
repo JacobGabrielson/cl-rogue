@@ -26,7 +26,9 @@
       (status)
       (setf lastscore purse)
       (cl-ncurses:wmove cw hero.y hero.x)
-      (unless (and (or running (plusp *count*)) jump)
+      (unless (and (or running 
+                       (plusp *count*)) 
+                   jump)
         (draw cw))                      ; Draw screen 
       (setf take nil
             *after* t)
@@ -82,7 +84,8 @@
             (setf newcount nil)
 
             ;; Execute a command
-            (when (and (plusp *count*) (not running))
+            (when (and (plusp *count*) 
+                       (not running))
               (decf *count*))
             (case ch
               (#\! (shell))
@@ -217,6 +220,7 @@
         (pick_up take))
       (unless running
         (setf door_stop nil)))
+
     ;; Kick off the rest if the daemons and fuses
     (when *after*
       (look nil)
@@ -260,10 +264,8 @@
 
 (defun rogue-search ()
   "Player gropes about him to find hidden things."
-  ;;
   ;; Look all around the hero, if there is something hidden there,
   ;; give him a chance to find it.  If its found, display it.
-  ;;
   (when (on *player* ISBLIND)
     (return-from rogue-search))
   (for (x (1- hero.x) (1+ hero.x))
@@ -287,11 +289,9 @@
   "Give single character help, or the whole mess if he wants it."
   (msg "Character you want help for (* for all): ")
   (let ((helpch (readchar)))
-    (setf mpos 0)
-    ;;
+    (zero! mpos)
     ;; If it's not a *, print the right help string
     ;; or an error if he typed a funny character.
-    ;;
     (unless (eql helpch #\*)
       (cl-ncurses:wmove cw 0 0)
       (let ((help-description (cdr (assoc helpch helpstr))))
@@ -299,10 +299,8 @@
             (msg "~a~a" helpch help-description)
             (msg "Unknown character '~c'" helpch))
         (return-from help)))
-    ;;
     ;; Here we print help for everything.
     ;; Then wait before we return to command mode
-    ;;
     (cl-ncurses:wclear hw)
     (let ((cnt 0))
       (map nil 
@@ -328,7 +326,7 @@
   "Tell the player what a certain thing is."
   (msg "What do you want identified? ")
   (let ((ch (readchar)))
-    (setf mpos 0)
+    (zero! mpos)
     (when (eql ch #\Escape)
       (msg "")
       (return-from identify))
