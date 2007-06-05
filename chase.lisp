@@ -3,7 +3,7 @@
 
 (in-package :cl-rogue)
 
-(define-resettable ch_ret (make-coord))            ; where chasing takes you 
+(define-resettable ch_ret (make-coord)) ; where chasing takes you 
 
 (defun runners (&optional arg)
   "Make all the running monsters move."
@@ -11,7 +11,8 @@
   (dolist (tp mlist)
     (when (and (off tp ISHELD) 
                (on tp ISRUN))
-      (unless (and (or (off tp ISSLOW) (thing-t_turn tp))
+      (unless (and (or (off tp ISSLOW) 
+                       (thing-t_turn tp))
                    (= (do_chase tp) -1))
         (unless (and (on tp ISHASTE)
                      (= (do_chase tp) -1))
@@ -28,14 +29,14 @@
         (this (thing-t_dest th)))  ; temporary destination for chaser 
     ;; We don't count doors as inside rooms for this routine
     (when (eql (rogue-mvwinch cl-ncurses:*stdscr* (coord-y (thing-t_pos th)) (coord-x (thing-t_pos th)))
-              DOOR)
+               DOOR)
       (setf rer nil))
     ;; If the object of our desire is in a different room than we are,
     ;; and we are not in a corridor, run to the door nearest to our
     ;; goal.
     (when (and rer 
                (not (eql rer ree)))
-      (for (i 0 (1- (moor-r_nexits rer))) ; loop through doors 
+      (for (i 0 (1- (moor-r_nexits rer))) ; loop through doors
         (setf dist (distance (coord-y (thing-t_dest th))
                              (coord-x (thing-t_dest th))
                              (coord-y (aref (moor-r_exit rer) i))
@@ -99,12 +100,11 @@ running (for when it dies)."
 
 (defun chase (tp ee)
   "Find the spot for the chaser(er) to move closer to the
-chasee(ee).  Returns TRUE if we want to keep on chasing later
-FALSE if we reach the goal."
+chasee(ee).  Returns t if we want to keep on chasing later, nil
+if we reach the goal."
   (let (dist 
         thisdist
-        (er (thing-t_pos tp))
-        ch)
+        (er (thing-t_pos tp)))
     ;; If the thing is confused, let it move randomly. Invisible
     ;; Stalkers are slightly confused all of the time, and bats are
     ;; quite confused all the time
@@ -138,23 +138,24 @@ FALSE if we reach the goal."
               (for (y (1- (coord-y er)) ey)
                 (let ((tryp (make-coord :x x :y y)))
                   (when (diag_ok er tryp)
-                    (setf ch (winat y x))
-                    (when (step_ok ch)
-                      ;; If it is a scroll, it might be a scare monster scroll
-                      ;; so we need to look it up to see what type it is.
-                      (when (or (not (eql ch SCROLL))
-                                (not (find-if
-                                      #'(lambda (obj)
-                                          (and (= y (coord-y (object-o_pos obj)))
-                                               (= x (coord-x (object-o_pos obj)))
-                                               (eql (object-o_which obj) S_SCARE)))
-                                      lvl_obj)))
-                        ;; If we didn't find any scrolls at this place or it
-                        ;; wasn't a scare scroll, then this place counts
-                        (setf thisdist (distance y x (coord-y ee) (coord-x ee)))
-                        (when (< thisdist dist)
-                          (setf ch_ret tryp
-                                dist thisdist)))))))))))
+                    (let ((ch (winat y x)))
+                      (when (step_ok ch)
+                        ;; If it is a scroll, it might be a scare monster scroll
+                        ;; so we need to look it up to see what type it is.
+                        (when (or (not (eql ch SCROLL))
+                                  (not (find-if
+                                        #'(lambda (obj)
+                                            (and (= y (coord-y (object-o_pos obj)))
+                                                 (= x (coord-x (object-o_pos obj)))
+                                                 (eql (object-o_which obj) S_SCARE)))
+                                        lvl_obj)))
+                          ;; If we didn't find any scrolls at this
+                          ;; place or it wasn't a scare scroll, then
+                          ;; this place counts
+                          (setf thisdist (distance y x (coord-y ee) (coord-x ee)))
+                          (when (< thisdist dist)
+                            (setf ch_ret tryp
+                                  dist thisdist))))))))))))
     (nonzerop dist)))
 
 (defun roomin (cp)

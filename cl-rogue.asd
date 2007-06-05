@@ -8,11 +8,11 @@
 (in-package :cl-rogue-asd)
 
 (defsystem :cl-rogue
-	   :version "0.0.1"
+           :version "0.0.1"
            :maintainer "Jacob Gabrielson <jacobg23@pobox.com>"
-           :license "See LICENSE file in this directory"
-	   :depends-on (:cl-ncurses :sb-posix)
-	   :components (
+           :license "MIT"
+           :depends-on (:cl-ncurses :sb-posix)
+           :components (
                         (:file "armor" :depends-on ("init"))
                         (:file "chase" :depends-on ("init"))
                         (:file "command" :depends-on ("init"))
