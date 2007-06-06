@@ -38,7 +38,12 @@
                        "rogue.sav"))
     (parse_opts (sb-posix:getenv "ROGUEOPTS"))
     (when (zerop (length whoami))
-      (setf whoami (sb-unix:uid-username (sb-posix:getuid))))
+      (setf whoami 
+            #-(or win32 mswindows)
+            (sb-unix:uid-username (sb-posix:getuid))
+            #+(or win32 mswindows)
+            (or (sb-posix:getenv "USERNAME") "Unknown")
+            ))
     (when (zerop (length fruit))
       (setf fruit "slime-mold"))
 
