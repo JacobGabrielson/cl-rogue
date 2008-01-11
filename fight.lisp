@@ -3,14 +3,14 @@
 
 (in-package :cl-rogue)
 
-(defparameter e_levels 
+(defparameter e-levels 
   #(10 20 40 80 160 320 640 1280 2560 5120 10240 20480
     40920 81920 163840 327680 655360 1310720 2621440 0))
 
 (defun fight (mp mn weap thrown)
   "The player attacks the monster."
-  (let ((did_hit t)
-        (tp (find_mons (coord-y mp) (coord-x mp))))
+  (let ((did-hit t)
+        (tp (find-mons (coord-y mp) (coord-x mp))))
     ;; Find the monster we want to fight
     (unless tp 
       (rogue-debug "Fight what @ ~d,~d" (coord-y mp) (coord-x mp)))
@@ -19,33 +19,33 @@
     (setf quiet 0)
     (runto mp hero)
     ;; Let him know it was really a mimic (if it was one).
-    (when (and (eql (thing-t_type tp) #\M)
-               (not (eql (thing-t_disguise tp) #\M))
+    (when (and (eql (thing-t-type tp) #\M)
+               (not (eql (thing-t-disguise tp) #\M))
                (off *player* ISBLIND))
       (msg "Wait! That's a mimic!")
-      (setf (thing-t_disguise tp) #\M)  ;
-      (setf did_hit thrown))
-    (when did_hit
-      (let ((mname (if (on *player* ISBLIND) "it" (monster-m_name (char-monster mn)))))
-        (setf did_hit nil)
-        (if (roll_em pstats (thing-t_stats tp) weap thrown)
+      (setf (thing-t-disguise tp) #\M)  ;
+      (setf did-hit thrown))
+    (when did-hit
+      (let ((mname (if (on *player* ISBLIND) "it" (monster-m-name (char-monster mn)))))
+        (setf did-hit nil)
+        (if (roll-em pstats (thing-t-stats tp) weap thrown)
             (progn
-              (setf did_hit t)
+              (setf did-hit t)
               (if thrown
                   (thunk weap mname)
                   (hit nil mname))
               (when (on *player* CANHUH)
                 (msg "Your hands stop glowing red")
                 (msg "The ~a appears confused." mname)
-                (logior! (thing-t_flags tp) ISHUH)
-                (logclr! (thing-t_flags *player*) CANHUH))
-              (when (<= (stats-s_hpt (thing-t_stats tp)) 0)
+                (logior! (thing-t-flags tp) ISHUH)
+                (logclr! (thing-t-flags *player*) CANHUH))
+              (when (<= (stats-s-hpt (thing-t-stats tp)) 0)
                 (killed tp t)))
             (if thrown
                 (bounce weap mname)
                 (miss nil mname)))))
     (setf *count* 0)
-    did_hit))
+    did-hit))
 
 (defun attack (mp)
   "The monster attacks the player."
@@ -54,20 +54,20 @@
   (setf running nil)
   (setf quiet 0)
 
-  (when (and (eql (thing-t_type mp) #\M)
+  (when (and (eql (thing-t-type mp) #\M)
              (off *player* ISBLIND))
-    (setf (thing-t_disguise mp) #\M))
+    (setf (thing-t-disguise mp) #\M))
 
   (let ((mname (if (on *player* ISBLIND) 
                    "it" 
-                   (monster-m_name (char-monster (thing-t_type mp)))))
-        (mtype (thing-t_type mp))
-        (mstats (thing-t_stats mp)))
-    (if (roll_em mstats pstats nil nil)
+                   (monster-m-name (char-monster (thing-t-type mp)))))
+        (mtype (thing-t-type mp))
+        (mstats (thing-t-stats mp)))
+    (if (roll-em mstats pstats nil nil)
         (progn
           (unless (eql mtype #\E)
             (hit mname nil))
-          (when (<= (stats-s_hpt pstats) 0)
+          (when (<= (stats-s-hpt pstats) 0)
             (death mtype))              ; Bye bye life ... 
           (when (off mp ISCANC)
             (case mtype
@@ -75,29 +75,29 @@
                ;;
                ;; If a rust monster hits, you lose armor
                ;;
-               (when (and cur_armor (< (object-o_ac cur_armor) 9))
+               (when (and cur-armor (< (object-o-ac cur-armor) 9))
                  (if terse
                      (msg "Your armor weakens")
                      (msg "Your armor appears to be weaker now. Oh my!"))
-                 (incf (object-o_ac cur_armor))))
+                 (incf (object-o-ac cur-armor))))
               (#\E
                ;; The gaze of the floating eye hypnotizes you
                (unless (on *player* ISBLIND)
-                 (unless (nonzerop no_command)
+                 (unless (nonzerop no-command)
                    (addmsg "You are transfixed")
                    (unless terse
                      (addmsg " by the gaze of the floating eye."))
                    (endmsg))
-                 (incf no_command 
+                 (incf no-command 
                        (+ (rnd 2) 2))))
               (#\A
                ;;
                ;; Ants have poisonous bites
                ;;
-               (unless (save VS_POISON)
-                 (if (not (iswearing R_SUSTSTR))
+               (unless (save VS-POISON)
+                 (if (not (iswearing R-SUSTSTR))
                      (progn
-                       (chg_str -1)
+                       (chg-str -1)
                        (if terse
                            (msg "A sting has weakened you")
                            (msg "You feel a sting in your arm and now feel weaker")))
@@ -109,39 +109,39 @@
                ;; Wraiths might drain energy levels
                                         ;
                (when (< (rnd 100) 15)
-                 (when (zerop (decf (stats-s_exp pstats)))
+                 (when (zerop (decf (stats-s-exp pstats)))
                    (death #\W))         ; All levels gone 
                  (msg "You suddenly feel weaker.")
-                 (if (zerop (decf (stats-s_lvl pstats)))
-                     (setf (stats-s_exp pstats) 0
-                           (stats-s_lvl pstats) 1)
-                     (setf (stats-s_exp pstats) (1+ (aref e_levels
-                                                          (1- (stats-s_lvl pstats))))))
+                 (if (zerop (decf (stats-s-lvl pstats)))
+                     (setf (stats-s-exp pstats) 0
+                           (stats-s-lvl pstats) 1)
+                     (setf (stats-s-exp pstats) (1+ (aref e-levels
+                                                          (1- (stats-s-lvl pstats))))))
                  (let ((fewer (roll 1 10)))
-                   (decf (stats-s_hpt pstats) fewer)
-                   (decf max_hp fewer))
-                 (when (< (stats-s_hpt pstats) 1)
-                   (setf (stats-s_hpt pstats) 1))
-                 (when (< max_hp 1)
+                   (decf (stats-s-hpt pstats) fewer)
+                   (decf max-hp fewer))
+                 (when (< (stats-s-hpt pstats) 1)
+                   (setf (stats-s-hpt pstats) 1))
+                 (when (< max-hp 1)
                    (death #\W))))
               (#\F
                ;; Violet fungi stops the poor guy from moving
-               (logior! (thing-t_flags *player*) ISHELD)
-               (setf (stats-s_dmg (monster-m_stats (char-monster #\F)))
-                     (format nil "~dd1" (incf fung_hit))))
+               (logior! (thing-t-flags *player*) ISHELD)
+               (setf (stats-s-dmg (monster-m-stats (char-monster #\F)))
+                     (format nil "~dd1" (incf fung-hit))))
               (#\L
                ;; Leperachaun steals some gold
                (let ((lastpurse purse))
                  (decf purse (goldcalc))
-                 (unless (save VS_MAGIC)
+                 (unless (save VS-MAGIC)
                    (decf purse (+ (goldcalc) (goldcalc) (goldcalc) (goldcalc))))
                  (when (< purse 0)
                    (setf purse 0))
                  (unless (= purse lastpurse)
                    (msg "Your purse feels lighter"))
-                 (remove_monster (thing-t_pos mp)
-                                 (find_mons (coord-y (thing-t_pos mp)) 
-                                            (coord-x (thing-t_pos mp)))))
+                 (remove-monster (thing-t-pos mp)
+                                 (find-mons (coord-y (thing-t-pos mp)) 
+                                            (coord-x (thing-t-pos mp)))))
                (setf mp nil))
               (#\N
                ;; Nymphs steal a magic item, look through the pack
@@ -150,66 +150,66 @@
                      (nobj 0))
                  (map nil
                       #'(lambda (o)
-                          (when (and (not (eql o cur_armor))
-                                     (not (eql o cur_weapon))
-                                     (is_magic o)
+                          (when (and (not (eql o cur-armor))
+                                     (not (eql o cur-weapon))
+                                     (is-magic o)
                                      (zerop (rnd (incf nobj))))
                             (setf obj o)))
                       pack)
                  (when obj
-                   (remove_monster (thing-t_pos mp)
-                                   (find_mons (coord-y (thing-t_pos mp))
-                                              (coord-x (thing-t_pos mp))))
+                   (remove-monster (thing-t-pos mp)
+                                   (find-mons (coord-y (thing-t-pos mp))
+                                              (coord-x (thing-t-pos mp))))
                    (setf mp nil)
-                   (if (and (> (object-o_count obj) 1)
-                            (zerop (object-o_group obj)))
+                   (if (and (> (object-o-count obj) 1)
+                            (zerop (object-o-group obj)))
                        (progn 
-                         (let ((oc (1- (object-o_count obj))))
-                           (setf (object-o_count obj) 1)
-                           (msg "She stole ~a!" (inv_name obj t))
-                           (setf (object-o_count obj) oc)))
+                         (let ((oc (1- (object-o-count obj))))
+                           (setf (object-o-count obj) 1)
+                           (msg "She stole ~a!" (inv-name obj t))
+                           (setf (object-o-count obj) oc)))
                        (progn
-                         (msg "She stole ~a!" (inv_name obj t))
+                         (msg "She stole ~a!" (inv-name obj t))
                          (detach pack obj)))
                    (decf inpack)))))))
-        ;; else of roll_em clause
-        (unless (eql (thing-t_type mp) #\E)
-          (when (eql (thing-t_type mp) #\F)
-            (decf (stats-s_hpt pstats) fung_hit)
-            (when (<= (stats-s_hpt pstats) 0)
+        ;; else of roll-em clause
+        (unless (eql (thing-t-type mp) #\E)
+          (when (eql (thing-t-type mp) #\F)
+            (decf (stats-s-hpt pstats) fung-hit)
+            (when (<= (stats-s-hpt pstats) 0)
               (death #\F)))             ; Bye bye life ... 
           (miss mname nil)))
     ;; Check to see if this is a regenerating monster and let it heal if
     ;; it is.
     (when (and mp (on mp ISREGEN) (< (rnd 100) 33))
-      (incf (stats-s_hpt (thing-t_stats mp))))
-    (when fight_flush
-      (flush_type))                     ; flush typeahead 
+      (incf (stats-s-hpt (thing-t-stats mp))))
+    (when fight-flush
+      (flush-type))                     ; flush typeahead 
     (setf *count* 0)
     (status)
 
     (if mp 0 -1)))
 
-(defun swing (at_lvl op_arm wplus)
+(defun swing (at-lvl op-arm wplus)
   "Returns true if the swing hits."
   (>= (+ (1+ (rnd 20))
          wplus)
-      (- (- 21 at_lvl)
-         op_arm)))
+      (- (- 21 at-lvl)
+         op-arm)))
 
-(defun check_level ()
+(defun check-level ()
   "Check to see if the guy has gone up a level."
   (when-let (i (position-if #'(lambda (l)
-                                (> l (stats-s_exp pstats)))
-                            e_levels))
+                                (> l (stats-s-exp pstats)))
+                            e-levels))
     (incf i)
-    (when (> i (stats-s_lvl pstats))
-      (let ((add (roll (- i (stats-s_lvl pstats)) 10)))
-        (incf max_hp add)
-        (when (> (incf (stats-s_hpt pstats) add) max_hp)
-          (setf (stats-s_hpt pstats) max_hp))
+    (when (> i (stats-s-lvl pstats))
+      (let ((add (roll (- i (stats-s-lvl pstats)) 10)))
+        (incf max-hp add)
+        (when (> (incf (stats-s-hpt pstats) add) max-hp)
+          (setf (stats-s-hpt pstats) max-hp))
         (msg "Welcome to level ~d" i)))
-    (setf (stats-s_lvl pstats) i)))
+    (setf (stats-s-lvl pstats) i)))
 
 (defun parse-dice (dice)
   (values
@@ -217,78 +217,78 @@
    (when-let (d (position #\d dice))
      (parse-integer dice :start (1+ d) :junk-allowed t))))
 
-(defun roll_em (att def weap hurl)
+(defun roll-em (att def weap hurl)
   "Roll several attacks."
   (let (cp 
-        def_arm
-        did_hit
-        (prop_hplus 0)
-        (prop_dplus 0))
+        def-arm
+        did-hit
+        (prop-hplus 0)
+        (prop-dplus 0))
     (cond
       ((null weap) 
-       (setf cp (stats-s_dmg att)))
+       (setf cp (stats-s-dmg att)))
       (hurl
-       (if (and (logtest (object-o_flags weap) ISMISL)
-                cur_weapon
-                (eql (object-o_which cur_weapon) (object-o_launch weap)))
+       (if (and (logtest (object-o-flags weap) ISMISL)
+                cur-weapon
+                (eql (object-o-which cur-weapon) (object-o-launch weap)))
            (progn
-             (setf cp (object-o_hurldmg weap))
-             (setf prop_hplus (object-o_hplus cur_weapon))
-             (setf prop_dplus (object-o_dplus cur_weapon)))
-           (setf cp (if (logtest (object-o_flags weap) ISMISL)
-                        (object-o_damage weap)
-                        (object-o_hurldmg weap)))))
+             (setf cp (object-o-hurldmg weap))
+             (setf prop-hplus (object-o-hplus cur-weapon))
+             (setf prop-dplus (object-o-dplus cur-weapon)))
+           (setf cp (if (logtest (object-o-flags weap) ISMISL)
+                        (object-o-damage weap)
+                        (object-o-hurldmg weap)))))
       (t
-       (setf cp (object-o_damage weap))
+       (setf cp (object-o-damage weap))
        ;; Drain a staff of striking
-       (when (and (eql (object-o_type weap) STICK)
-                  (eql (object-o_which weap) WS_HIT)
-                  (zerop (object-o_charges weap)))
-         (setf (object-o_damage weap) "0d0"
-               (object-o_hplus weap) 0
-               (object-o_dplus weap) 0))))
+       (when (and (eql (object-o-type weap) STICK)
+                  (eql (object-o-which weap) WS-HIT)
+                  (zerop (object-o-charges weap)))
+         (setf (object-o-damage weap) "0d0"
+               (object-o-hplus weap) 0
+               (object-o-dplus weap) 0))))
     (loop
        (let (damage
-             (hplus (+ prop_hplus (if weap (object-o_hplus weap) 0)))
-             (dplus (+ prop_dplus (if weap (object-o_dplus weap) 0))))
-         (when (eql weap cur_weapon)
+             (hplus (+ prop-hplus (if weap (object-o-hplus weap) 0)))
+             (dplus (+ prop-dplus (if weap (object-o-dplus weap) 0))))
+         (when (eql weap cur-weapon)
            (cond
-             ((isring LEFT R_ADDDAM)
-              (incf dplus (object-o_ac (aref cur_ring LEFT))))
-             ((isring LEFT R_ADDHIT)
-              (incf hplus (object-o_ac (aref cur_ring LEFT))))
-             ((isring RIGHT R_ADDDAM)
-              (incf dplus (object-o_ac (aref cur_ring RIGHT))))
-             ((isring RIGHT R_ADDHIT)
-              (incf hplus (object-o_ac (aref cur_ring RIGHT))))))
+             ((isring LEFT R-ADDDAM)
+              (incf dplus (object-o-ac (aref cur-ring LEFT))))
+             ((isring LEFT R-ADDHIT)
+              (incf hplus (object-o-ac (aref cur-ring LEFT))))
+             ((isring RIGHT R-ADDDAM)
+              (incf dplus (object-o-ac (aref cur-ring RIGHT))))
+             ((isring RIGHT R-ADDHIT)
+              (incf hplus (object-o-ac (aref cur-ring RIGHT))))))
          (multiple-value-bind (ndice nsides) (parse-dice cp)
            (when nsides
              (if (eql def pstats)
                  (progn
-                   (setf def_arm
-                         (if cur_armor
-                             (object-o_ac cur_armor)
-                             (stats-s_arm def)))
-                   (decf def_arm
+                   (setf def-arm
+                         (if cur-armor
+                             (object-o-ac cur-armor)
+                             (stats-s-arm def)))
+                   (decf def-arm
                          (cond
-                           ((isring LEFT R_PROTECT)
-                            (object-o_ac (aref cur_ring LEFT)))
-                           ((isring RIGHT R_PROTECT)
-                            (object-o_ac (aref cur_ring RIGHT)))
+                           ((isring LEFT R-PROTECT)
+                            (object-o-ac (aref cur-ring LEFT)))
+                           ((isring RIGHT R-PROTECT)
+                            (object-o-ac (aref cur-ring RIGHT)))
                            (t 0))))
-                 (setf def_arm (stats-s_arm def)))
-             (when (swing (stats-s_lvl att) def_arm (+ hplus (str_plus (stats-s_str att))))
+                 (setf def-arm (stats-s-arm def)))
+             (when (swing (stats-s-lvl att) def-arm (+ hplus (str-plus (stats-s-str att))))
                (let ((proll (roll ndice nsides)))
                  (when (and (plusp (+ ndice nsides)) (< proll 1))
                    (rogue-debug "Damage for ~dd~d came out ~d." ndice nsides proll))
-                 (setf damage (+ dplus proll (add_dam (stats-s_str att))))
-                 (decf (stats-s_hpt def) (max 0 damage))
-                 (setf did_hit t)))
+                 (setf damage (+ dplus proll (add-dam (stats-s-str att))))
+                 (decf (stats-s-hpt def) (max 0 damage))
+                 (setf did-hit t)))
         
              (let ((slashpos (position #\/ cp)))
                (unless slashpos (return))
                (setf cp (subseq cp (1+ slashpos))))))))
-    did_hit))
+    did-hit))
 
 (defun prname (who upper)
   "The print name of a combatant."
@@ -327,37 +327,37 @@
   (verbose (addmsg " ~a" (prname ee nil)))
   (endmsg))
 
-(defun save_throw (which tp)
+(defun save-throw (which tp)
   "See if a creature saves against something."
   (let ((need (+ 14 
                  which 
                  (- (truncate 
-                     (/ (stats-s_lvl (thing-t_stats tp)) 
+                     (/ (stats-s-lvl (thing-t-stats tp)) 
                         2))))))
     (>= (roll 1 20) 
         need)))
 
 (defun save (which)
   "See if he saves against various nasty things."
-  (save_throw which *player*))
+  (save-throw which *player*))
 
-(defun str_plus (str)
+(defun str-plus (str)
   "Compute bonus/penalties for strength on the 'to hit' roll."
-  (let ((strstr (str_t-st_str str))
-        (add (str_t-st_add str)))
+  (let ((strstr (str-t-st-str str))
+        (add (str-t-st-add str)))
     (when (= 18 strstr)
       (if (= add 100)
-          (return-from str_plus 3)
-          (when (> add 50) (return-from str_plus 2))))
+          (return-from str-plus 3)
+          (when (> add 50) (return-from str-plus 2))))
     (cond 
       ((>= strstr 17) 1)
       ((> strstr 6) 0)
       (t (- strstr 7)))))
 
-(defun add_dam (str)
+(defun add-dam (str)
   "Compute additional damage done for exceptionally high or low strength."
-  (let ((strstr (str_t-st_str str))
-        (add (str_t-st_add str)))
+  (let ((strstr (str-t-st-str str))
+        (add (str-t-st-add str)))
     (cond
       ((= strstr 18)
        (cond
@@ -370,39 +370,39 @@
       ((> strstr 6) 0)
       (t (- strstr 7)))))
 
-(defun raise_level ()
+(defun raise-level ()
   "The guy just magically went up a level."
-  (setf (stats-s_exp pstats) (1+ (aref e_levels (1- (stats-s_lvl pstats)))))
-  (check_level))
+  (setf (stats-s-exp pstats) (1+ (aref e-levels (1- (stats-s-lvl pstats)))))
+  (check-level))
 
 (defun thunk (weap mname)
   "A missile hits a monster."
-  (if (eql (object-o_type weap) WEAPON)
-      (msg "The ~a hits the ~a" (aref w_names (object-o_which weap)) mname)
+  (if (eql (object-o-type weap) WEAPON)
+      (msg "The ~a hits the ~a" (aref w-names (object-o-which weap)) mname)
       (msg "You hit the ~a." mname)))
 
 (defun bounce (weap mname)
   "A missile misses a monster."
-  (if (eql (object-o_type weap) WEAPON)
-      (msg "The ~a misses the ~a" (aref w_names (object-o_which weap)) mname)
+  (if (eql (object-o-type weap) WEAPON)
+      (msg "The ~a misses the ~a" (aref w-names (object-o-which weap)) mname)
       (msg "You missed the ~a." mname)))
 
-(defun remove_monster (mp item)
+(defun remove-monster (mp item)
   "Remove a monster from the screen."
   (rogue-mvwaddch mw (coord-y mp) (coord-x mp) #\Space)
-  (rogue-mvwaddch cw (coord-y mp) (coord-x mp) (thing-t_oldch item))
+  (rogue-mvwaddch cw (coord-y mp) (coord-x mp) (thing-t-oldch item))
   (detach mlist item))
 
-(defun is_magic (obj)
+(defun is-magic (obj)
   "Returns true if an object radiates magic."
-  (case (object-o_type obj)
+  (case (object-o-type obj)
     (#.ARMOR 
      (not (eql
-           (object-o_ac obj) 
-           (aref a_class (object-o_which obj)))))
+           (object-o-ac obj) 
+           (aref a-class (object-o-which obj)))))
     (#.WEAPON
-     (or (not (zerop (object-o_hplus obj))) 
-         (not (zerop (object-o_dplus obj)))))
+     (or (not (zerop (object-o-hplus obj))) 
+         (not (zerop (object-o-dplus obj)))))
     ((#.POTION #.SCROLL #.STICK #.RING #.AMULET)
      t)
     (otherwise nil)))
@@ -415,35 +415,35 @@
         (msg "it.")
         (progn
           (verbose (addmsg "the "))
-          (msg "~a." (monster-m_name (char-monster (thing-t_type tp))))))
-    (incf (stats-s_exp pstats) 
-          (stats-s_exp (thing-t_stats tp)))
+          (msg "~a." (monster-m-name (char-monster (thing-t-type tp))))))
+    (incf (stats-s-exp pstats) 
+          (stats-s-exp (thing-t-stats tp)))
     ;; Do adjustments if he went up a level
-    (check_level)
+    (check-level)
     ;; If the monster was a violet fungi, un-hold him
-    (case (thing-t_type tp)
+    (case (thing-t-type tp)
       (#\F
-       (logclr! (thing-t_flags *player*) ISHELD)
-       (zero! fung_hit)
-       (setf (stats-s_dmg (monster-m_stats (char-monster #\F))) "000d0"))
+       (logclr! (thing-t-flags *player*) ISHELD)
+       (zero! fung-hit)
+       (setf (stats-s-dmg (monster-m-stats (char-monster #\F))) "000d0"))
       (#\L
-       (when-let (rp (roomin (thing-t_pos tp)))
-         (if (or (nonzerop (moor-r_goldval rp)) 
-                 (fallpos (thing-t_pos tp) (moor-r_gold rp) nil))
+       (when-let (rp (roomin (thing-t-pos tp)))
+         (if (or (nonzerop (moor-r-goldval rp)) 
+                 (fallpos (thing-t-pos tp) (moor-r-gold rp) nil))
              (progn
-               (incf (moor-r_goldval rp) (goldcalc))
-               (when (save VS_MAGIC)
-                 (incf (moor-r_goldval rp) (+ (goldcalc) (goldcalc) (goldcalc) (goldcalc))))
-               (rogue-mvwaddch cl-ncurses:*stdscr* (coord-y (moor-r_gold rp)) (coord-x (moor-r_gold rp)) GOLD)
-               (unless (logtest (moor-r_flags rp) ISDARK)
+               (incf (moor-r-goldval rp) (goldcalc))
+               (when (save VS-MAGIC)
+                 (incf (moor-r-goldval rp) (+ (goldcalc) (goldcalc) (goldcalc) (goldcalc))))
+               (rogue-mvwaddch cl-ncurses:*stdscr* (coord-y (moor-r-gold rp)) (coord-x (moor-r-gold rp)) GOLD)
+               (unless (logtest (moor-r-flags rp) ISDARK)
                  (light hero)
                  (rogue-mvwaddch cw hero.y hero.x PLAYER)))))))
     ;; Empty the monster's pack
-    (let ((pitem (thing-t_pack tp)))
+    (let ((pitem (thing-t-pack tp)))
       ;; Get rid of the monster
-      (remove_monster (thing-t_pos tp) tp)
+      (remove-monster (thing-t-pos tp) tp)
       (map nil
            #'(lambda (obj)
-               (setf (object-o_pos obj) (thing-t_pos tp))
+               (setf (object-o-pos obj) (thing-t-pos tp))
                (fall obj nil))
            pitem))))

@@ -15,14 +15,14 @@
       (incf ntimes))
 
     ;; Let the daemons start up
-    (do_daemons before)
-    (do_fuses before)
+    (do-daemons before)
+    (do-fuses before)
 
     (while (plusp ntimes)
       (decf ntimes)
       (look t)
       (unless running
-        (setf door_stop nil))
+        (setf door-stop nil))
       (status)
       (setf lastscore purse)
       (cl-ncurses:wmove cw hero.y hero.x)
@@ -35,7 +35,7 @@
       ;; Read command or continue run
       (when wizard
         (setf waswizard t))
-      (if (zerop no_command)
+      (if (zerop no-command)
           (progn
             (if running
                 (setf ch runch)
@@ -46,8 +46,8 @@
                       (when (and (not (zerop mpos)) (not running)) ; Erase message if it's there 
                         (msg ""))))))
           (setf ch #\Space))
-      (if (plusp no_command)
-          (when (zerop (decf no_command))
+      (if (plusp no-command)
+          (when (zerop (decf no-command))
             (msg "You can move again."))
           (progn
             ;; Check for prefixes
@@ -72,7 +72,7 @@
             (case ch
               (#\f
                (unless (on *player* ISBLIND)
-                 (setf door_stop t
+                 (setf door-stop t
                        firstmove t))
                (if (and (plusp *count*) (not newcount))
                    (setf ch direction)
@@ -89,55 +89,55 @@
               (decf *count*))
             (case ch
               (#\! (shell))
-              (#\h (do_move 0 -1))
-              (#\j (do_move 1 0))
-              (#\k (do_move -1 0))
-              (#\l (do_move 0 1))
-              (#\y (do_move -1 -1))
-              (#\u (do_move -1 1))
-              (#\b (do_move 1 -1))
-              (#\n (do_move 1 1))
-              (#\H (do_run #\h))
-              (#\J (do_run #\j))
-              (#\K (do_run #\k))
-              (#\L (do_run #\l))
-              (#\Y (do_run #\y))
-              (#\U (do_run #\u))
-              (#\B (do_run #\b))
-              (#\N (do_run #\n))
+              (#\h (do-move 0 -1))
+              (#\j (do-move 1 0))
+              (#\k (do-move -1 0))
+              (#\l (do-move 0 1))
+              (#\y (do-move -1 -1))
+              (#\u (do-move -1 1))
+              (#\b (do-move 1 -1))
+              (#\n (do-move 1 1))
+              (#\H (do-run #\h))
+              (#\J (do-run #\j))
+              (#\K (do-run #\k))
+              (#\L (do-run #\l))
+              (#\Y (do-run #\y))
+              (#\U (do-run #\u))
+              (#\B (do-run #\b))
+              (#\N (do-run #\n))
               (#\t
-               (if (not (get_dir))
+               (if (not (get-dir))
                    (setf *after* nil)
                    (missile delta.y delta.x)))
               (#\Q (setf *after* nil)
                    (rogue-quit -1))
               (#\i (setf *after* nil)
-                   (inventory (thing-t_pack *player*) nil))
+                   (inventory (thing-t-pack *player*) nil))
               (#\I (setf *after* nil)
-                   (picky_inven))
+                   (picky-inven))
               (#\d (drop))
               (#\q (quaff))
-              (#\r (read_scroll))
+              (#\r (read-scroll))
               (#\e (eat))
               (#\w (wield))
               (#\W (wear))
-              (#\T (take_off))
-              (#\P (ring_on))
-              (#\R (ring_off))
+              (#\T (take-off))
+              (#\P (ring-on))
+              (#\R (ring-off))
               (#\o (option))
               (#\c (call))
               (#\> (setf *after* nil)
-                   (d_level))
+                   (d-level))
               (#\< (setf *after* nil)
-                   (u_level))
+                   (u-level))
               (#\? (setf *after* nil)
                    (help))
               (#\/ (setf *after* nil)
                    (identify))
               (#\s (rogue-search))
-              (#\z (do_zap nil))
-              (#\p (if (get_dir)
-                       (do_zap t)
+              (#\z (do-zap nil))
+              (#\p (if (get-dir)
+                       (do-zap t)
                        (setf *after* nil)))
               (#\v (msg "Rogue version ~a. (mctesq was here)" release))
               (#.(ctrl #\L)
@@ -148,7 +148,7 @@
                  (setf *after* nil)
                  (msg huh))
               (#\S (setf *after* nil)
-                   (when (save_game)
+                   (when (save-game)
                      (cl-ncurses:wmove cw (1- cl-ncurses:*lines*) 0))
                    (cl-ncurses:wclrtoeol cw)
                    (draw cw)
@@ -168,7 +168,7 @@
                              (setf waswizard t))
                            (msg "Sorry")))))
               (#\Escape
-               (setf door_stop nil
+               (setf door-stop nil
                      *count* 0
                      *after* nil))
               (otherwise
@@ -176,36 +176,36 @@
                (if wizard
                    (case ch
                      (#\@ (msg "@ ~d,~d" hero.y hero.x))
-                     (#\C (create_obj))
-                     (#.(ctrl #\I) (inventory lvl_obj nil))
+                     (#\C (create-obj))
+                     (#.(ctrl #\I) (inventory lvl-obj nil))
                      (#.(ctrl #\W) (whatis))
-                     (#.(ctrl #\D) (incf level) (new_level))
-                     (#.(ctrl #\U) (decf level) (new_level))
-                     (#.(ctrl #\F) (show_win cl-ncurses:*stdscr* "--More (level map)--"))
-                     (#.(ctrl #\X) (show_win mw "--More (monsters)--"))
+                     (#.(ctrl #\D) (incf level) (new-level))
+                     (#.(ctrl #\U) (decf level) (new-level))
+                     (#.(ctrl #\F) (show-win cl-ncurses:*stdscr* "--More (level map)--"))
+                     (#.(ctrl #\X) (show-win mw "--More (monsters)--"))
                      (#.(ctrl #\T) (teleport))
-                     (#.(ctrl #\E) (msg "food left: ~d" food_left))
+                     (#.(ctrl #\E) (msg "food left: ~d" food-left))
                      (#.(ctrl #\A) (msg "~d things in your pack" inpack))
-                     (#.(ctrl #\C) (add_pass))
-                     (#.(ctrl #\N) (when-let (obj (get_item "charge" STICK))
-                                     (setf (object-o_charges obj) 10000)))
+                     (#.(ctrl #\C) (add-pass))
+                     (#.(ctrl #\N) (when-let (obj (get-item "charge" STICK))
+                                     (setf (object-o-charges obj) 10000)))
                      (#.(ctrl #\H)
-                        (dotimes (i 9) (raise_level))
+                        (dotimes (i 9) (raise-level))
                         ;; Give the rogue a sword (+1,+1)
-                        (let ((obj (make-object :o_type WEAPON 
-                                                :o_which TWOSWORD)))
-                          (init_weapon obj SWORD)
-                          (setf (object-o_hplus obj) 1
-                                (object-o_dplus obj) 1)
-                          (add_pack obj t)
-                          (setf cur_weapon obj))
+                        (let ((obj (make-object :o-type WEAPON 
+                                                :o-which TWOSWORD)))
+                          (init-weapon obj SWORD)
+                          (setf (object-o-hplus obj) 1
+                                (object-o-dplus obj) 1)
+                          (add-pack obj t)
+                          (setf cur-weapon obj))
                         ;; And his suit of armor
-                        (let ((obj (make-object :o_type ARMOR 
-                                                :o_which PLATE_MAIL
-                                                :o_ac -5
-                                                :o_flags ISKNOW)))
-                          (setf cur_armor obj)
-                          (add_pack obj t)))
+                        (let ((obj (make-object :o-type ARMOR 
+                                                :o-which PLATE-MAIL
+                                                :o-ac -5
+                                                :o-flags ISKNOW)))
+                          (setf cur-armor obj)
+                          (add-pack obj t)))
                      (otherwise
                       (msg "Illegal command '~a'." (unctrl-char ch))
                       (setf *count* 0)))
@@ -214,25 +214,25 @@
                      (setf *count* 0)))))
             ;; Turn off flags if no longer needed
             (unless running
-              (setf door_stop nil))))
+              (setf door-stop nil))))
       ;; If he ran into something to take, let him pick it up.
       (when take
-        (pick_up take))
+        (pick-up take))
       (unless running
-        (setf door_stop nil)))
+        (setf door-stop nil)))
 
     ;; Kick off the rest if the daemons and fuses
     (when *after*
       (look nil)
-      (do_daemons AFTER)
-      (do_fuses AFTER)
-      (if (isring LEFT R_SEARCH)
+      (do-daemons AFTER)
+      (do-fuses AFTER)
+      (if (isring LEFT R-SEARCH)
           (rogue-search)
-          (when (and (isring LEFT R_TELEPORT) (< (rnd 100) 2))
+          (when (and (isring LEFT R-TELEPORT) (< (rnd 100) 2))
             (teleport)))
-      (if (isring RIGHT R_SEARCH)
+      (if (isring RIGHT R-SEARCH)
           (rogue-search)
-          (when (and (isring LEFT R_TELEPORT) (< (rnd 100) 2))
+          (when (and (isring LEFT R-TELEPORT) (< (rnd 100) 2))
             (teleport))))))
 
 (defun rogue-quit (p)
@@ -278,12 +278,12 @@
         (#.TRAP
          (unless (or (eql (rogue-mvwinch cw y x) TRAP)
                      (> (rnd 100) 50))
-           (let ((tp (trap_at y x)))
-             (logior! (rogue-trap-tr_flags tp) ISFOUND)
+           (let ((tp (trap-at y x)))
+             (logior! (rogue-trap-tr-flags tp) ISFOUND)
              (rogue-mvwaddch cw y x TRAP)
              (setf *count* 0
                    running nil)
-             (msg (tr_name (rogue-trap-tr_type tp))))))))))
+             (msg (tr-name (rogue-trap-tr-type tp))))))))))
 
 (defun help ()
   "Give single character help, or the whole mess if he wants it."
@@ -314,7 +314,7 @@
     (cl-ncurses:wmove hw (1- cl-ncurses:*lines*) 0)
     (cl-ncurses:wprintw hw "--Press space to continue--")
     (draw hw)
-    (wait_for #\Space)
+    (wait-for #\Space)
     (cl-ncurses:wclear hw)
     (draw hw)
     (cl-ncurses:wmove cw 0 0)
@@ -334,7 +334,7 @@
      "'~a' : ~a"
      (unctrl-char ch)
      (if (and (alpha-char-p ch) (upper-case-p ch))
-         (monster-m_name (char-monster ch))
+         (monster-m-name (char-monster ch))
          (case ch
            ((#\| #\-) "wall of a room")
            (#.GOLD "gold")
@@ -355,23 +355,23 @@
            (#.STICK "wand or staff")
            (otherwise "unknown character"))))))
 
-(defun d_level ()
+(defun d-level ()
   "He wants to go down a level."
   (if (not (eql (winat hero.y hero.x) STAIRS))
       (msg "I see no way down.")
       (progn
         (incf level)
-        (new_level))))
+        (new-level))))
 
-(defun u_level ()
+(defun u-level ()
   "He wants to go up a level."
   (if (and (eql (winat hero.y hero.x) STAIRS)
            amulet)
       (progn
         (decf level)
         (when (zerop level)
-          (total_winner))
-        (new_level)
+          (total-winner))
+        (new-level)
         (msg "You feel a wrenching sensation in your gut."))
       (msg "I see no way up.")))
 
@@ -382,7 +382,7 @@
 ;; {
 ;;    register int pid;
 ;;    register char *sh;
-;;    int ret_status;
+;;    int ret-status;
 
 ;;    
 ;;     * Set the terminal back to original mode
@@ -392,7 +392,7 @@
 ;;    wmove(hw, LINES-1, 0);
 ;;    draw(hw);
 ;;    endwin();
-;;    in_shell = TRUE;
+;;    in-shell = TRUE;
 ;;    fflush(stdout);
 ;;    
 ;;     * Fork and do a shell
@@ -412,17 +412,17 @@
 ;;    }
 ;;    else
 ;;    {
-;;        signal(SIGINT, SIG_IGN);
-;;        signal(SIGQUIT, SIG_IGN);
-;;        while (wait(&ret_status) != pid)
+;;        signal(SIGINT, SIG-IGN);
+;;        signal(SIGQUIT, SIG-IGN);
+;;        while (wait(&ret-status) != pid)
 ;;            continue;
 ;;        signal(SIGINT, endit);
 ;;        signal(SIGQUIT, endit);
 ;;        printf("\n[Press return to continue]");
 ;;        noecho();
 ;;        (cl-ncurses:cbreak);
-;;        in_shell = FALSE;
-;;        wait_for('\n');
+;;        in-shell = FALSE;
+;;        wait-for('\n');
 ;;        clearok(cw, TRUE);
 ;;        touchwin(cw);
 ;;    }
@@ -431,37 +431,37 @@
 (defun call ()
   "Allow a user to call a potion, scroll, or ring something."
   ;; Make certain that it is something that we want to wear.
-  (when-let (obj (get_item "call" CALLABLE))
+  (when-let (obj (get-item "call" CALLABLE))
     (multiple-value-bind (guess know elsewise)
-        (case (object-o_type obj)
+        (case (object-o-type obj)
           (#.RING
-           (values r_guess
-                   r_know
-                   (if (aref r_guess (object-o_which obj))
-                       (aref r_guess (object-o_which obj))
-                       (aref r_stones (object-o_which obj)))))
+           (values r-guess
+                   r-know
+                   (if (aref r-guess (object-o-which obj))
+                       (aref r-guess (object-o-which obj))
+                       (aref r-stones (object-o-which obj)))))
           (#.POTION
-           (values p_guess
-                   p_know
-                   (if (aref p_guess (object-o_which obj))
-                       (aref p_guess (object-o_which obj))
-                       (aref p_colors (object-o_which obj)))))
+           (values p-guess
+                   p-know
+                   (if (aref p-guess (object-o-which obj))
+                       (aref p-guess (object-o-which obj))
+                       (aref p-colors (object-o-which obj)))))
           (#.SCROLL
-           (values s_guess
-                   s_know
-                   (if (aref s_guess (object-o_which obj))
-                       (aref s_guess (object-o_which obj))
-                       (aref s_names (object-o_which obj)))))
+           (values s-guess
+                   s-know
+                   (if (aref s-guess (object-o-which obj))
+                       (aref s-guess (object-o-which obj))
+                       (aref s-names (object-o-which obj)))))
           (#.STICK
-           (values ws_guess
-                   ws_know
-                   (if (aref ws_guess (object-o_which obj))
-                       (aref ws_guess (object-o_which obj))
-                       (aref ws_made (object-o_which obj)))))
+           (values ws-guess
+                   ws-know
+                   (if (aref ws-guess (object-o-which obj))
+                       (aref ws-guess (object-o-which obj))
+                       (aref ws-made (object-o-which obj)))))
           (otherwise
            (msg "You can't call that anything")
            (return-from call)))
-      (when (aref know (object-o_which obj))
+      (when (aref know (object-o-which obj))
         (msg "That has already been identified")
         (return-from call))
       (if terse
@@ -472,6 +472,6 @@
           (msg "Call it: ")
           (msg "What do you want to call it? "))
       (multiple-value-bind (opt status)
-          (get_str elsewise cw)
+          (get-str elsewise cw)
         (when (eql status NORM)
-          (setf (aref guess (object-o_which obj)) opt))))))
+          (setf (aref guess (object-o-which obj)) opt))))))

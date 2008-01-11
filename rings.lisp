@@ -5,91 +5,91 @@
 (in-package :cl-rogue)
 
 (defmacro left-ring ()
-  `(aref cur_ring LEFT))
+  `(aref cur-ring LEFT))
 
 (defmacro right-ring ()
-  `(aref cur_ring RIGHT))
+  `(aref cur-ring RIGHT))
 
-(defun ring_on ()
-  (when-let (obj (get_item "put on" RING))
+(defun ring-on ()
+  (when-let (obj (get-item "put on" RING))
     ;; Make certain that it is somethings that we want to wear
-    (unless (eql (object-o_type obj) RING)
+    (unless (eql (object-o-type obj) RING)
       (if terse
           (msg "Not a ring")
           (msg "It would be difficult to wrap that around a finger"))
-      (return-from ring_on))
+      (return-from ring-on))
 
     ;; find out which hand to put it on
-    (when (is_current obj)
-      (return-from ring_on))
+    (when (is-current obj)
+      (return-from ring-on))
 
     (let (which-ring)
       (cond
         ((and
-          (null (aref cur_ring LEFT))
-          (null (aref cur_ring RIGHT)))
+          (null (aref cur-ring LEFT))
+          (null (aref cur-ring RIGHT)))
          (when (minusp (setf which-ring (gethand)))
-           (return-from ring_on)))
-        ((null (aref cur_ring LEFT))
+           (return-from ring-on)))
+        ((null (aref cur-ring LEFT))
          (setf which-ring LEFT))
-        ((null (aref cur_ring RIGHT))
+        ((null (aref cur-ring RIGHT))
          (setf which-ring RIGHT))
         (t
          (if terse
              (msg "Wearing two")
              (msg "You already have a ring on each hand"))
-         (return-from ring_on)))
-      (setf (aref cur_ring which-ring) obj)
+         (return-from ring-on)))
+      (setf (aref cur-ring which-ring) obj)
 
       ;; Calculate the effect it has on the poor guy.
-      (case (object-o_which obj)
-        (#.R_ADDSTR
-         (let ((save_max (stats-s_str max_stats))) ; TODO: max_stats should be a macro??
-           (chg_str (object-o_ac obj))
-           (setf (stats-s_str max_stats) save_max)))
-        (#.R_SEEINVIS
-         (logior! (thing-t_flags *player*) CANSEE)
+      (case (object-o-which obj)
+        (#.R-ADDSTR
+         (let ((save-max (stats-s-str max-stats))) ; TODO: max-stats should be a macro??
+           (chg-str (object-o-ac obj))
+           (setf (stats-s-str max-stats) save-max)))
+        (#.R-SEEINVIS
+         (logior! (thing-t-flags *player*) CANSEE)
          (light hero)
          (rogue-mvwaddch cw hero.y hero.x PLAYER))
-        (#.R_AGGR
+        (#.R-AGGR
          (aggravate)))
       (status)
       (cond
-        ((and (aref r_know (object-o_which obj))
-              (aref r_guess (object-o_which obj)))
-         (setf (aref r_guess (object-o_which obj)) nil))
+        ((and (aref r-know (object-o-which obj))
+              (aref r-guess (object-o-which obj)))
+         (setf (aref r-guess (object-o-which obj)) nil))
         ((and
-          (not (aref r_know (object-o_which obj)))
+          (not (aref r-know (object-o-which obj)))
           askme
-          (null (aref r_guess (object-o_which obj))))
+          (null (aref r-guess (object-o-which obj))))
          (zero! mpos)
          (msg (if terse "Call it: " "What do you want to call it? "))
          (let ((buf ""))
-           (when (eql (get_str buf cw) NORM)
-             (setf (aref r_guess (object-o_which obj)) buf)))
+           (when (eql (get-str buf cw) NORM)
+             (setf (aref r-guess (object-o-which obj)) buf)))
          (msg ""))))))
 
-(defun ring_off ()
+(defun ring-off ()
   (let (which-ring)
     (cond
       ((and (null (left-ring))
             (null (right-ring)))
        (msg (if "No rings" "You aren't wearing any rings"))
-       (return-from ring_off))
+       (return-from ring-off))
       ((null (left-ring))
        (setf which-ring RIGHT))
       ((null (right-ring))
        (setf which-ring LEFT))
       (t 
        (when (minusp (setf which-ring (gethand))))
-       (return-from ring_off)))
+       (return-from ring-off)))
     (zero! mpos)
-    (let ((obj (aref cur_ring which-ring)))
+    (let ((obj (aref cur-ring which-ring)))
       (unless obj
         (msg "Not wearing such a ring")
-        (return-from ring_off))
+        (return-from ring-off))
       (when (dropcheck obj)
-        (msg "Was wearing ~a" (inv_name obj t))))))
+        (msg "Was wearing ~a" (inv-name obj t))))))
 
 (defun gethand ()
   (loop
@@ -105,26 +105,26 @@
        (zero! mpos)
        (msg (if terse "L or R" "Please type L or R")))))
 
-(defun ring_eat (hand)
+(defun ring-eat (hand)
   "How much food does this ring use up?"
-  (let ((obj (aref cur_ring hand)))
+  (let ((obj (aref cur-ring hand)))
     (if obj
-        (case (object-o_which obj)
-          (#.R_REGEN 2)
-          (#.R_SUSTSTR 1)
-          (#.R_SEARCH (if (< (rnd 100) 33) 1 0))
-          (#.R_DIGEST (if (< (rnd 100) 50) -1 0))
+        (case (object-o-which obj)
+          (#.R-REGEN 2)
+          (#.R-SUSTSTR 1)
+          (#.R-SEARCH (if (< (rnd 100) 33) 1 0))
+          (#.R-DIGEST (if (< (rnd 100) 50) -1 0))
           (otherwise 0))
         0)))
 
-(defun ring_num (obj)
+(defun ring-num (obj)
   "Print ring bonuses."
-  (unless (logtest (object-o_flags obj) ISKNOW)
-    (return-from ring_num ""))
-  (case (object-o_which obj)
-    ((#.R_PROTECT
-      #.R_ADDSTR
-      #.R_ADDDAM
-      #.R_ADDHIT)
-     (concatenate 'string " " (num (object-o_ac obj) 0)))
+  (unless (logtest (object-o-flags obj) ISKNOW)
+    (return-from ring-num ""))
+  (case (object-o-which obj)
+    ((#.R-PROTECT
+      #.R-ADDSTR
+      #.R-ADDDAM
+      #.R-ADDHIT)
+     (concatenate 'string " " (num (object-o-ac obj) 0)))
     (otherwise "")))

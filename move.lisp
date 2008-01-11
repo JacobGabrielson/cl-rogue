@@ -3,20 +3,20 @@
 
 (in-package :cl-rogue)
 
-(defun do_run (ch)
+(defun do-run (ch)
   "Start the hero running."
   (setf running t
         *after* nil
         runch ch))
 
-(defun do_move (dy dx)
+(defun do-move (dy dx)
   "Check to see that a move is legal.  If it is, handle the
 consequences (fighting, picking up, etc."
   (setf firstmove nil)
-  (when (plusp no_move)
-    (decf no_move)
+  (when (plusp no-move)
+    (decf no-move)
     (msg "You are still stuck in the bear trap")
-    (return-from do_move))
+    (return-from do-move))
 
   ;; Do a confused move (maybe)
   (cond
@@ -33,10 +33,10 @@ consequences (fighting, picking up, etc."
             (> (coord-x nh) (1- cl-ncurses:*cols*))
             (minusp (coord-y nh))
             (> (coord-y nh) (1- cl-ncurses:*lines*))
-            (not (diag_ok hero nh)))
+            (not (diag-ok hero nh)))
     (setf *after* nil
           running nil)
-    (return-from do_move))
+    (return-from do-move))
 
   (when (and running 
              (equalp hero nh))
@@ -46,17 +46,17 @@ consequences (fighting, picking up, etc."
     (when (and (on *player* ISHELD) 
                (not (eql ch #\F)))
       (msg "You are being held")
-      (return-from do_move))
+      (return-from do-move))
     (case ch
       ((#\Space #\| #\- #.SECRETDOOR)
        (setf *after* nil
              running nil)
-       (return-from do_move))
+       (return-from do-move))
       (#.TRAP
-       (setf ch (be_trapped nh))
+       (setf ch (be-trapped nh))
        (case ch
          ((#.TRAPDOOR #.TELTRAP) 
-          (return-from do_move))))
+          (return-from do-move))))
       ((#.GOLD #.POTION #.SCROLL #.FOOD #.WEAPON
                #.ARMOR #.RING #.AMULET #.STICK)
        (setf running nil
@@ -74,8 +74,8 @@ consequences (fighting, picking up, etc."
        (setf running nil))
       ((upper-case-p ch)
        (setf running nil)
-       (fight nh ch cur_weapon nil)
-       (return-from do_move)))
+       (fight nh ch cur-weapon nil)
+       (return-from do-move)))
 
     (setf ch (winat hero.y hero.x))
     (cl-ncurses::wmove cw hero.y hero.x)
@@ -89,30 +89,30 @@ consequences (fighting, picking up, etc."
 that might move."
   (when-let (rp (roomin cp))
     (unless (on *player* ISBLIND)
-      (dotimes (j (coord-y (moor-r_max rp)))
-        (dotimes (k (coord-x (moor-r_max rp)))
-          (let* ((dx (+ (coord-x (moor-r_pos rp)) 
+      (dotimes (j (coord-y (moor-r-max rp)))
+        (dotimes (k (coord-x (moor-r-max rp)))
+          (let* ((dx (+ (coord-x (moor-r-pos rp)) 
                         k))
-                 (dy (+ (coord-y (moor-r_pos rp)) 
+                 (dy (+ (coord-y (moor-r-pos rp)) 
                         j))
                  (ch (show dy dx))
-                 (darkp (logtest (moor-r_flags rp) ISDARK)))
+                 (darkp (logtest (moor-r-flags rp) ISDARK)))
             (cl-ncurses::wmove cw dy dx)
             ;; Figure out how to display a secret door.
             (when (eql ch SECRETDOOR)
               (setf ch
                     (if (or (zerop j)
-                            (= j (1- (coord-y (moor-r_max rp)))))
+                            (= j (1- (coord-y (moor-r-max rp)))))
                         #\-
                         #\|)))
             ;; If the room is a dark room, we might want to remove
             ;; monsters and the like from it (since they might
             ;; move).
             (when (upper-case-p ch)
-              (let ((item (wake_monster dy dx)))
-                (when (and (eql (thing-t_oldch item) #\Space)
+              (let ((item (wake-monster dy dx)))
+                (when (and (eql (thing-t-oldch item) #\Space)
                            (not darkp))
-                  (setf (thing-t_oldch item) (rogue-mvwinch 
+                  (setf (thing-t-oldch item) (rogue-mvwinch 
                                               cl-ncurses:*stdscr* 
                                               dy dx)))))
             (rogue-mvwaddch
@@ -136,120 +136,120 @@ un-initiated."
   (let ((ch (winat y x)))
     (case ch
       (#.TRAP
-       (if (logtest (rogue-trap-tr_flags (trap_at y x)) ISFOUND)
+       (if (logtest (rogue-trap-tr-flags (trap-at y x)) ISFOUND)
            TRAP 
            FLOOR))
       ((#\M #\I)
-       (let ((tp (find_mons y x)))
+       (let ((tp (find-mons y x)))
          (unless tp
            (msg "Can't find monster in show"))
          (if (eql ch #\M)
-             (thing-t_disguise tp)
+             (thing-t-disguise tp)
              (when (off *player* CANSEE)
                ;; Hide invisible monsters
                (rogue-mvwinch cl-ncurses:*stdscr* y x)))))
       (otherwise ch))))
 
-(defun be_trapped (tc)
+(defun be-trapped (tc)
   "The guy stepped on a trap.... Make him pay."
-  (let* ((tp        (trap_at (coord-y tc) (coord-x tc)))
-         (trap-pos  (rogue-trap-tr_pos tp))
-         (trap-type (rogue-trap-tr_type tp)))
+  (let* ((tp        (trap-at (coord-y tc) (coord-x tc)))
+         (trap-pos  (rogue-trap-tr-pos tp))
+         (trap-type (rogue-trap-tr-type tp)))
     (setf *count* 0
           running nil)
     (rogue-mvwaddch cw (coord-y trap-pos) (coord-x trap-pos) TRAP)
-    (logior! (rogue-trap-tr_flags tp) ISFOUND)
+    (logior! (rogue-trap-tr-flags tp) ISFOUND)
     (case trap-type
       (#.TRAPDOOR 
        (incf level)
-       (new_level)
+       (new-level)
        (msg "You fell into a trap!"))
       (#.BEARTRAP
-       (incf no_move BEARTIME)
+       (incf no-move BEARTIME)
        (msg "You are caught in a bear trap"))
       (#.SLEEPTRAP
-       (incf no_command SLEEPTIME)
+       (incf no-command SLEEPTIME)
        (msg "A strange white mist envelops you and you fall asleep"))
       (#.ARROWTRAP
-       (if (swing (1- (stats-s_lvl pstats))
-                  (stats-s_arm pstats)
+       (if (swing (1- (stats-s-lvl pstats))
+                  (stats-s-arm pstats)
                   1)
            (progn
              (msg "Oh no! An arrow shot you")
-             (when (< (decf (stats-s_hpt pstats) (roll 1 6))
+             (when (< (decf (stats-s-hpt pstats) (roll 1 6))
                       1)
                (msg "The arrow killed you.")
                (death #\a)))
            (progn
              (msg "An arrow shoots past you.")
              (let ((obj (make-object)))
-               (setf (object-o_type obj) WEAPON
-                     (object-o_which obj) ARROW)
-               (init_weapon obj ARROW)
-               (setf (object-o_count obj) 1
-                     (object-o_pos obj) hero
-                     (object-o_hplus obj) 0
-                     (object-o_dplus obj) 0)
+               (setf (object-o-type obj) WEAPON
+                     (object-o-which obj) ARROW)
+               (init-weapon obj ARROW)
+               (setf (object-o-count obj) 1
+                     (object-o-pos obj) hero
+                     (object-o-hplus obj) 0
+                     (object-o-dplus obj) 0)
                (fall obj nil)))))
       (#.TELTRAP 
        (teleport))
       (#.DARTTRAP
-       (if (swing (1+ (stats-s_lvl pstats))
-                  (stats-s_arm pstats)
+       (if (swing (1+ (stats-s-lvl pstats))
+                  (stats-s-arm pstats)
                   1)
            (progn
              (msg "A small dart just hit you in the shoulder")
-             (when (< (decf (stats-s_hpt pstats) 
+             (when (< (decf (stats-s-hpt pstats) 
                             (roll 1 4))
                       1)
                (msg "The dart killed you.")
                (death #\d))
-             (unless (iswearing R_SUSTSTR)
-               (chg_str -1)))
+             (unless (iswearing R-SUSTSTR)
+               (chg-str -1)))
            (msg "A small dart whizzes by your ear and vanishes."))))
-    (flush_type)                        ; flush typeahead  
+    (flush-type)                        ; flush typeahead  
     trap-type))
 
-(defun trap_at (y x)
+(defun trap-at (y x)
   "Find the trap at (y,x) on screen."
   (or
    (find (make-coord :x x :y y)
          traps
          :test #'equalp
-         :key #'rogue-trap-tr_pos)
+         :key #'rogue-trap-tr-pos)
    (rogue-debug (format nil "Trap at ~d,~d not in array" y x))))
 
 (defun object-at (y x)
   (find (make-coord :y y :x x)
-        lvl_obj
-        :key #'object-o_pos))
+        lvl-obj
+        :key #'object-o-pos))
 
 (defun rndmove (who)
   "Move in a random direction if the monster/person is confused."
-  (let* ((ret (thing-t_pos who))
+  (let* ((ret (thing-t-pos who))
          (ey (1+ (coord-y ret)))
          (ex (1+ (coord-x ret)))
          (nopen 0))
     ;; Now go through the spaces surrounding the player and
     ;; set that place in the array to true if the space can be
     ;; moved into
-    (for (y (1- (coord-y (thing-t_pos who))) 
+    (for (y (1- (coord-y (thing-t-pos who))) 
             ey)
       (when (and (>= y 0)
                  (<  y cl-ncurses:*lines*))
-        (for (x (1- (coord-x (thing-t_pos who))) 
+        (for (x (1- (coord-x (thing-t-pos who))) 
                 ex)
           (block continue
             (unless (or (minusp x)
                         (>= x cl-ncurses:*cols*))
               (let ((ch (winat y x)))
-                (when (step_ok ch)
+                (when (step-ok ch)
                   (let ((dest (make-coord :y y :x x)))
-                    (when (diag_ok (thing-t_pos who) 
+                    (when (diag-ok (thing-t-pos who) 
                                    dest)
                       (when (eql ch SCROLL)
                         (when-let (obj (object-at y x))
-                          (when (eql (object-o_which obj) S_SCARE)
+                          (when (eql (object-o-which obj) S-SCARE)
                             (return-from continue)))))
                     (when (zerop (rnd (incf nopen)))
                       (setf ret dest))))))))))

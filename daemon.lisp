@@ -8,80 +8,80 @@
 (defparameter DAEMON -1)
 (defparameter MAXDAEMONS 20)
 
-(defstruct delayed_action
-  (d_type EMPTY :type fixnum)
-  (d_func nil :type symbol)
-  (d_arg nil)
-  (d_time 0 :type fixnum))
+(defstruct delayed-action
+  (d-type EMPTY :type fixnum)
+  (d-func nil :type symbol)
+  (d-arg nil)
+  (d-time 0 :type fixnum))
 
-(define-resettable d_list (let ((new-dlist (make-array MAXDAEMONS :element-type 'delayed_action)))
+(define-resettable d-list (let ((new-dlist (make-array MAXDAEMONS :element-type 'delayed-action)))
                             (dotimes (i (length new-dlist))
-                              (setf (aref new-dlist i) (make-delayed_action)))
+                              (setf (aref new-dlist i) (make-delayed-action)))
                             new-dlist))
 
-(defun d_slot ()
+(defun d-slot ()
   "Find an empty slot in the daemon/fuse list."
-  (or (find EMPTY d_list :key #'delayed_action-d_type)
+  (or (find EMPTY d-list :key #'delayed-action-d-type)
       (rogue-debug "Ran out of fuse slots")))
 
-(defun find_slot (func)
+(defun find-slot (func)
   "Find a particular slot in the table."
   (find-if #'(lambda (x) 
-               (and (not (eql (delayed_action-d_type x) EMPTY))
-                    (eql (delayed_action-d_func x) func)))
-           d_list))
+               (and (not (eql (delayed-action-d-type x) EMPTY))
+                    (eql (delayed-action-d-func x) func)))
+           d-list))
 
 (defun daemon (func arg type)
   "Start a daemon, takes a function."
-  (let ((dev (d_slot)))
-    (setf (delayed_action-d_type dev) type
-          (delayed_action-d_func dev) func
-          (delayed_action-d_arg dev) arg
-          (delayed_action-d_time dev) DAEMON)))
+  (let ((dev (d-slot)))
+    (setf (delayed-action-d-type dev) type
+          (delayed-action-d-func dev) func
+          (delayed-action-d-arg dev) arg
+          (delayed-action-d-time dev) DAEMON)))
 
-(defun kill_daemon (func)
+(defun kill-daemon (func)
   "Remove a daemon from the list."
-  (when-let (dev (find_slot func))
+  (when-let (dev (find-slot func))
     ;; Take it out of the list
-    (setf (delayed_action-d_type dev) EMPTY)))
+    (setf (delayed-action-d-type dev) EMPTY)))
 
-(defun do_daemons (flag)
+(defun do-daemons (flag)
   "Run all the daemons that are active with the current flag,
 passing the argument to the function."
   (map nil 
        #'(lambda (d)
-           (when (and (eql (delayed_action-d_type d) flag) 
-                      (eql (delayed_action-d_time d) DAEMON))
-             (funcall (delayed_action-d_func d) (delayed_action-d_arg d))))
-       d_list))
+           (when (and (eql (delayed-action-d-type d) flag) 
+                      (eql (delayed-action-d-time d) DAEMON))
+             (funcall (delayed-action-d-func d) (delayed-action-d-arg d))))
+       d-list))
 
 (defun fuse (func arg time type)
   "Start a fuse to go off in a certain number of turns."
-  (let ((wire (d_slot)))
-    (setf (delayed_action-d_type wire) type
-          (delayed_action-d_func wire) func
-          (delayed_action-d_arg wire) arg
-          (delayed_action-d_time wire) time)))
+  (let ((wire (d-slot)))
+    (setf (delayed-action-d-type wire) type
+          (delayed-action-d-func wire) func
+          (delayed-action-d-arg wire) arg
+          (delayed-action-d-time wire) time)))
 
 (defun lengthen (func xtime)
   "Increase the time until a fuse goes off."
-  (when-let (wire (find_slot func))
-    (incf (delayed_action-d_time wire) xtime)))
+  (when-let (wire (find-slot func))
+    (incf (delayed-action-d-time wire) xtime)))
 
 (defun extinguish (func)
   "Put out a fuse."
-  (when-let (wire (find_slot func))
-    (setf (delayed_action-d_type wire) EMPTY)))
+  (when-let (wire (find-slot func))
+    (setf (delayed-action-d-type wire) EMPTY)))
 
-(defun do_fuses (flag)
+(defun do-fuses (flag)
   "Decrement counters and start needed fuses."
   (map nil
        #'(lambda (wire)
-           (when (and (eql flag (delayed_action-d_type wire))
-                      (plusp (delayed_action-d_time wire))
-                      (zerop (decf (delayed_action-d_time wire))))
+           (when (and (eql flag (delayed-action-d-type wire))
+                      (plusp (delayed-action-d-time wire))
+                      (zerop (decf (delayed-action-d-time wire))))
              ;; Decrementing counters and starting things we want.  We also need
              ;; to remove the fuse from the list once it has gone off.
-             (setf (delayed_action-d_type wire) EMPTY)
-             (funcall (delayed_action-d_func wire) (delayed_action-d_arg wire))))
-       d_list))
+             (setf (delayed-action-d-type wire) EMPTY)
+             (funcall (delayed-action-d-func wire) (delayed-action-d-arg wire))))
+       d-list))

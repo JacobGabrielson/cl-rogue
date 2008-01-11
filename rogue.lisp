@@ -60,15 +60,15 @@
 (defconstant ESCAPE 27)
 (defconstant LEFT 0)
 (defconstant RIGHT 1)
-(defconstant BOLT_LENGTH 6)
+(defconstant BOLT-LENGTH 6)
 
 ;;; Save against things
-(defconstant VS_POISON #o00)
-(defconstant VS_PARALYZATION #o00)
-(defconstant VS_DEATH #o00)
-(defconstant VS_PETRIFICATION #o01)
-(defconstant VS_BREATH #o02)
-(defconstant VS_MAGIC  #o03)
+(defconstant VS-POISON #o00)
+(defconstant VS-PARALYZATION #o00)
+(defconstant VS-DEATH #o00)
+(defconstant VS-PETRIFICATION #o01)
+(defconstant VS-BREATH #o02)
+(defconstant VS-MAGIC  #o03)
 
 ;;; Various flag bits
 (defconstant ISDARK #o0000001)
@@ -94,39 +94,39 @@
 (defconstant ISHASTE #o0100000)
 
 ;;; Potion types
-(defconstant P_CONFUSE 0)
-(defconstant P_PARALYZE 1)
-(defconstant P_POISON 2)
-(defconstant P_STRENGTH 3)
-(defconstant P_SEEINVIS 4)
-(defconstant P_HEALING 5)
-(defconstant P_MFIND 6)
-(defconstant P_TFIND 7)
-(defconstant P_RAISE 8)
-(defconstant P_XHEAL 9)
-(defconstant P_HASTE 10)
-(defconstant P_RESTORE 11)
-(defconstant P_BLIND 12)
-(defconstant P_NOP 13)
+(defconstant P-CONFUSE 0)
+(defconstant P-PARALYZE 1)
+(defconstant P-POISON 2)
+(defconstant P-STRENGTH 3)
+(defconstant P-SEEINVIS 4)
+(defconstant P-HEALING 5)
+(defconstant P-MFIND 6)
+(defconstant P-TFIND 7)
+(defconstant P-RAISE 8)
+(defconstant P-XHEAL 9)
+(defconstant P-HASTE 10)
+(defconstant P-RESTORE 11)
+(defconstant P-BLIND 12)
+(defconstant P-NOP 13)
 (defconstant MAXPOTIONS 14)
 
 ;;; Scroll types
-(defconstant S_CONFUSE 0)
-(defconstant S_MAP 1)
-(defconstant S_LIGHT 2)
-(defconstant S_HOLD 3)
-(defconstant S_SLEEP 4)
-(defconstant S_ARMOR 5)
-(defconstant S_IDENT 6)
-(defconstant S_SCARE 7)
-(defconstant S_GFIND 8)
-(defconstant S_TELEP 9)
-(defconstant S_ENCH 10)
-(defconstant S_CREATE 11)
-(defconstant S_REMOVE 12)
-(defconstant S_AGGR 13)
-(defconstant S_NOP 14)
-(defconstant S_GENOCIDE 15)
+(defconstant S-CONFUSE 0)
+(defconstant S-MAP 1)
+(defconstant S-LIGHT 2)
+(defconstant S-HOLD 3)
+(defconstant S-SLEEP 4)
+(defconstant S-ARMOR 5)
+(defconstant S-IDENT 6)
+(defconstant S-SCARE 7)
+(defconstant S-GFIND 8)
+(defconstant S-TELEP 9)
+(defconstant S-ENCH 10)
+(defconstant S-CREATE 11)
+(defconstant S-REMOVE 12)
+(defconstant S-AGGR 13)
+(defconstant S-NOP 14)
+(defconstant S-GENOCIDE 15)
 (defconstant MAXSCROLLS 16)
 
 ;;; Weapon types
@@ -146,46 +146,46 @@
 
 ;;; Armor types
 (defconstant LEATHER 0)
-(defconstant RING_MAIL 1)
-(defconstant STUDDED_LEATHER 2)
-(defconstant SCALE_MAIL 3)
-(defconstant CHAIN_MAIL 4)
-(defconstant SPLINT_MAIL 5)
-(defconstant BANDED_MAIL 6)
-(defconstant PLATE_MAIL 7)
+(defconstant RING-MAIL 1)
+(defconstant STUDDED-LEATHER 2)
+(defconstant SCALE-MAIL 3)
+(defconstant CHAIN-MAIL 4)
+(defconstant SPLINT-MAIL 5)
+(defconstant BANDED-MAIL 6)
+(defconstant PLATE-MAIL 7)
 (defconstant MAXARMORS 8)
 
 ;;; Ring types
-(defconstant R_PROTECT 0)
-(defconstant R_ADDSTR 1)
-(defconstant R_SUSTSTR 2)
-(defconstant R_SEARCH 3)
-(defconstant R_SEEINVIS 4)
-(defconstant R_NOP 5)
-(defconstant R_AGGR 6)
-(defconstant R_ADDHIT 7)
-(defconstant R_ADDDAM 8)
-(defconstant R_REGEN 9)
-(defconstant R_DIGEST 10)
-(defconstant R_TELEPORT 11)
-(defconstant R_STEALTH 12)
+(defconstant R-PROTECT 0)
+(defconstant R-ADDSTR 1)
+(defconstant R-SUSTSTR 2)
+(defconstant R-SEARCH 3)
+(defconstant R-SEEINVIS 4)
+(defconstant R-NOP 5)
+(defconstant R-AGGR 6)
+(defconstant R-ADDHIT 7)
+(defconstant R-ADDDAM 8)
+(defconstant R-REGEN 9)
+(defconstant R-DIGEST 10)
+(defconstant R-TELEPORT 11)
+(defconstant R-STEALTH 12)
 (defconstant MAXRINGS 13)
 
 ;;; Rod/Wand/Staff types
-(defconstant WS_LIGHT 0)
-(defconstant WS_HIT 1)
-(defconstant WS_ELECT 2)
-(defconstant WS_FIRE 3)
-(defconstant WS_COLD 4)
-(defconstant WS_POLYMORPH 5)
-(defconstant WS_MISSILE 6)
-(defconstant WS_HASTE_M 7)
-(defconstant WS_SLOW_M 8)
-(defconstant WS_DRAIN 9)
-(defconstant WS_NOP 10)
-(defconstant WS_TELAWAY 11)
-(defconstant WS_TELTO 12)
-(defconstant WS_CANCEL 13)
+(defconstant WS-LIGHT 0)
+(defconstant WS-HIT 1)
+(defconstant WS-ELECT 2)
+(defconstant WS-FIRE 3)
+(defconstant WS-COLD 4)
+(defconstant WS-POLYMORPH 5)
+(defconstant WS-MISSILE 6)
+(defconstant WS-HASTE-M 7)
+(defconstant WS-SLOW-M 8)
+(defconstant WS-DRAIN 9)
+(defconstant WS-NOP 10)
+(defconstant WS-TELAWAY 11)
+(defconstant WS-TELTO 12)
+(defconstant WS-CANCEL 13)
 (defconstant MAXSTICKS 14)
 
 ;;; All the fun defines
@@ -199,10 +199,10 @@
   `(push ,item ,list))
 
 (defun inroom (rp cp)
-  (and (<= (coord-x cp) (+ (coord-x (moor-r_pos rp)) (1- (coord-x (moor-r_max rp)))))
-       (<= (coord-x (moor-r_pos rp)) (coord-x cp))
-       (<= (coord-y cp) (+ (coord-y (moor-r_pos rp)) (1- (coord-y (moor-r_max rp)))))
-       (<= (coord-y (moor-r_pos rp)) (coord-y cp))))
+  (and (<= (coord-x cp) (+ (coord-x (moor-r-pos rp)) (1- (coord-x (moor-r-max rp)))))
+       (<= (coord-x (moor-r-pos rp)) (coord-x cp))
+       (<= (coord-y cp) (+ (coord-y (moor-r-pos rp)) (1- (coord-y (moor-r-max rp)))))
+       (<= (coord-y (moor-r-pos rp)) (coord-y cp))))
 
 (defun winat (y x)
   (if (eql (rogue-mvwinch mw y x) #\Space)
@@ -231,14 +231,14 @@
 (defun draw (window)
   (cl-ncurses:wrefresh window))
 
-(define-symbol-macro hero.x (coord-x (thing-t_pos *player*)))
-(define-symbol-macro hero.y (coord-y (thing-t_pos *player*)))
-(define-symbol-macro hero (thing-t_pos *player*))
-(define-symbol-macro pstats (thing-t_stats *player*))
-(define-symbol-macro pack (thing-t_pack *player*))
+(define-symbol-macro hero.x (coord-x (thing-t-pos *player*)))
+(define-symbol-macro hero.y (coord-y (thing-t-pos *player*)))
+(define-symbol-macro hero (thing-t-pos *player*))
+(define-symbol-macro pstats (thing-t-stats *player*))
+(define-symbol-macro pack (thing-t-pack *player*))
 
 (defun on (thing flag) 
-  (logtest (thing-t_flags thing) flag))
+  (logtest (thing-t-flags thing) flag))
 
 (defun off (thing flag)
   (not (on thing flag)))
@@ -250,8 +250,8 @@
 
 (defun isring (h r) 
   (and
-   (not (null (aref cur_ring h)))
-   (equal (object-o_which (aref cur_ring h)) r)))
+   (not (null (aref cur-ring h)))
+   (equal (object-o-which (aref cur-ring h)) r)))
 
 (defun iswearing (r) 
   (or (isring LEFT r)
@@ -260,8 +260,8 @@
 (defun newgrp () 
   (incf group))
 
-(defmacro object-o_charges (o)
-  `(object-o_ac ,o))
+(defmacro object-o-charges (o)
+  `(object-o-ac ,o))
 
 (defun ismult (type) 
   (or (equal type POTION)
@@ -282,80 +282,80 @@
   (x 0 :type fixnum)
   (y 0 :type fixnum))
 
-(defstruct str_t 
-  (st_str 0 :type fixnum)
-  (st_add 0 :type fixnum))
+(defstruct str-t 
+  (st-str 0 :type fixnum)
+  (st-add 0 :type fixnum))
 
-(defstruct magic_item
+(defstruct magic-item
   "Stuff about magic items"
-  (mi_name "" :type string)
-  (mi_prob 0 :type fixnum)
-  (mi_worth 0 :type fixnum))
+  (mi-name "" :type string)
+  (mi-prob 0 :type fixnum)
+  (mi-worth 0 :type fixnum))
 
 (defstruct moor
   "Room structure"
-  (r_pos (make-coord) :type coord)
-  (r_max (make-coord) :type coord)
-  (r_gold (make-coord) :type coord)
-  (r_goldval 0 :type fixnum)
-  (r_flags 0 :type fixnum)
-  (r_nexits 0 :type fixnum)
+  (r-pos (make-coord) :type coord)
+  (r-max (make-coord) :type coord)
+  (r-gold (make-coord) :type coord)
+  (r-goldval 0 :type fixnum)
+  (r-flags 0 :type fixnum)
+  (r-nexits 0 :type fixnum)
   ;; The following sucks, you have to initialize manually to a fresh
   ;; array of coords. Fortunately that's only in one place.
-  r_exit)
+  r-exit)
 
 (defstruct rogue-trap 
   "Array of all traps on this level"
-  (tr_pos (make-coord) :type coord)
-  (tr_type #\Nul :type character) 
-  (tr_flags 0 :type fixnum))
+  (tr-pos (make-coord) :type coord)
+  (tr-type #\Nul :type character) 
+  (tr-flags 0 :type fixnum))
 
 (defstruct stats 
   "Structure describing a fighting being"
-  (s_str (make-str_t) :type str_t)
-  (s_exp 0 :type integer)
-  (s_lvl 0 :type fixnum)
-  (s_arm 0 :type fixnum)
-  (s_hpt 0 :type fixnum)
-  (s_dmg "" :type string))
+  (s-str (make-str-t) :type str-t)
+  (s-exp 0 :type integer)
+  (s-lvl 0 :type fixnum)
+  (s-arm 0 :type fixnum)
+  (s-hpt 0 :type fixnum)
+  (s-dmg "" :type string))
 
 (defstruct thing 
   "Structure for monsters and player"
-  (t_pos (make-coord) :type coord)
-  (t_turn nil :type boolean)
-  (t_type #\Nul :type character)
-  (t_disguise #\Nul :type character)
-  (t_oldch #\Nul :type character)
-  (t_dest (make-coord) :type coord)
-  (t_flags 0 :type fixnum)
-  (t_stats (make-stats) :type stats)
-  (t_pack (list))
-  (t_reserved 0 :type fixnum))
+  (t-pos (make-coord) :type coord)
+  (t-turn nil :type boolean)
+  (t-type #\Nul :type character)
+  (t-disguise #\Nul :type character)
+  (t-oldch #\Nul :type character)
+  (t-dest (make-coord) :type coord)
+  (t-flags 0 :type fixnum)
+  (t-stats (make-stats) :type stats)
+  (t-pack (list))
+  (t-reserved 0 :type fixnum))
 
 (defstruct monster
   "Array containing information on all the various types of mosnters"
-  (m_name "" :type string)              ; What to call the monster
-  (m_carry 0 :type fixnum)              ; Probability of carrying something
-  (m_flags 0 :type fixnum)              ; Things about the monster
-  (m_stats (make-stats) :type stats))   ; Initial stats
+  (m-name "" :type string)              ; What to call the monster
+  (m-carry 0 :type fixnum)              ; Probability of carrying something
+  (m-flags 0 :type fixnum)              ; Things about the monster
+  (m-stats (make-stats) :type stats))   ; Initial stats
 
 (defstruct object 
   "Structure for a thing that the rogue can carry"
-  (o_type #\Nul :type character)               ; What kind of object it is
-  (o_pos (make-coord) :type coord)
-  (o_launch 100 :type fixnum)           ; "o_which" needed to launch it, 100 == impossible
-  (o_damage "" :type string)
-  (o_hurldmg "" :type string)
-  (o_count 0 :type fixnum)
-  (o_which 0 :type fixnum)
-  (o_hplus 0 :type fixnum)
-  (o_dplus 0 :type fixnum)
-  (o_ac 0 :type fixnum)
-  (o_flags 0 :type fixnum)
-  (o_group 0 :type fixnum))
+  (o-type #\Nul :type character)               ; What kind of object it is
+  (o-pos (make-coord) :type coord)
+  (o-launch 100 :type fixnum)           ; "o-which" needed to launch it, 100 == impossible
+  (o-damage "" :type string)
+  (o-hurldmg "" :type string)
+  (o-count 0 :type fixnum)
+  (o-which 0 :type fixnum)
+  (o-hplus 0 :type fixnum)
+  (o-dplus 0 :type fixnum)
+  (o-ac 0 :type fixnum)
+  (o-flags 0 :type fixnum)
+  (o-group 0 :type fixnum))
 
 (defstruct words 
-  (w_string "" :type string))
+  (w-string "" :type string))
 
 (defconstant NCOLORS 24)
 (defconstant NSYLLS  159)

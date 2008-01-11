@@ -8,7 +8,7 @@
 
 (in-package :cl-rogue)
 
-(define-resettable num_checks 0)     ; times we've gone over in checkout() 
+(define-resettable num-checks 0)     ; times we've gone over in checkout() 
 (defparameter cw nil)                   ; Window that the player sees 
 (defparameter hw nil)                   ; Used for the help command 
 (defparameter mw nil)                   ; Used to store mosnters 
@@ -30,13 +30,13 @@
 
     ;; Get home and options from environment
     (setf home (user-homedir-pathname))
-    (setf file_name
+    (setf file-name
           (concatenate 'string
                        (directory-namestring (probe-file 
                                               (make-pathname :directory (pathname-directory
                                                                          (user-homedir-pathname)))))
                        "rogue.sav"))
-    (parse_opts (sb-posix:getenv "ROGUEOPTS"))
+    (parse-opts (sb-posix:getenv "ROGUEOPTS"))
     (when (zerop (length whoami))
       (setf whoami 
             #-(or win32 mswindows)
@@ -56,12 +56,12 @@
     (reset-rogue-symbols)
 
     (format t "Hello ~a, just a moment while I dig the dungeon..." whoami)
-    (init_player)                       ; roll up the rogue 
-    (init_things)                    ; set up probabilities of things 
-    (init_names)                        ; set up names of scrolls 
-    (init_colors)                       ; set up colors of potions 
-    (init_stones)                    ; set up stone settings of rings 
-    (init_materials)                    ; set up materials of wands 
+    (init-player)                       ; roll up the rogue 
+    (init-things)                    ; set up probabilities of things 
+    (init-names)                        ; set up names of scrolls 
+    (init-colors)                       ; set up colors of potions 
+    (init-stones)                    ; set up stone settings of rings 
+    (init-materials)                    ; set up materials of wands 
     (unwind-protect
          (progn
            (cl-ncurses:initscr)         ; start up cursor package 
@@ -84,7 +84,7 @@
                  mw (cl-ncurses:newwin cl-ncurses:*lines* cl-ncurses:*cols* 0 0)
                  hw (cl-ncurses:newwin cl-ncurses:*lines* cl-ncurses:*cols* 0 0)
                  waswizard wizard)
-           (new_level)                  ; Draw current level 
+           (new-level)                  ; Draw current level 
            ;; Start up daemons and fuses
            (daemon 'doctor 0 AFTER)
            (fuse 'swander 0 WANDERTIME AFTER)
@@ -92,42 +92,42 @@
            (daemon 'runners 0 AFTER)
            ;; Give the rogue his weaponry.  First a mace.
            (let (obj)
-             (setf obj (make-object :o_type WEAPON :o_which MACE))
-             (init_weapon obj MACE)
-             (setf (object-o_hplus obj) 1
-                   (object-o_dplus obj) 1
-                   (object-o_flags obj) (logior (object-o_flags obj) ISKNOW))
-             (add_pack obj t)
-             (setf cur_weapon obj)
+             (setf obj (make-object :o-type WEAPON :o-which MACE))
+             (init-weapon obj MACE)
+             (setf (object-o-hplus obj) 1
+                   (object-o-dplus obj) 1
+                   (object-o-flags obj) (logior (object-o-flags obj) ISKNOW))
+             (add-pack obj t)
+             (setf cur-weapon obj)
 
              ;; Now a +1 bow
-             (setf obj (make-object :o_type WEAPON :o_which BOW))
-             (init_weapon obj BOW)
-             (setf (object-o_hplus obj) 1
-                   (object-o_dplus obj) 0
-                   (object-o_flags obj) (logior (object-o_flags obj) ISKNOW))
-             (add_pack obj t)
+             (setf obj (make-object :o-type WEAPON :o-which BOW))
+             (init-weapon obj BOW)
+             (setf (object-o-hplus obj) 1
+                   (object-o-dplus obj) 0
+                   (object-o-flags obj) (logior (object-o-flags obj) ISKNOW))
+             (add-pack obj t)
 
              ;; Now some arrows
-             (setf obj (make-object :o_type WEAPON :o_which ARROW))
-             (init_weapon obj ARROW)
-             (setf (object-o_count obj) (+ 25 (rnd 15))
-                   (object-o_hplus obj) 0
-                   (object-o_dplus obj) 0
-                   (object-o_flags obj) (logior (object-o_flags obj) ISKNOW))
-             (add_pack obj t)
+             (setf obj (make-object :o-type WEAPON :o-which ARROW))
+             (init-weapon obj ARROW)
+             (setf (object-o-count obj) (+ 25 (rnd 15))
+                   (object-o-hplus obj) 0
+                   (object-o-dplus obj) 0
+                   (object-o-flags obj) (logior (object-o-flags obj) ISKNOW))
+             (add-pack obj t)
 
              ;; And his suit of armor
-             (setf obj (make-object :o_type  ARMOR 
-                                    :o_which RING_MAIL
-                                    :o_ac    (1- (aref a_class RING_MAIL))
-                                    :o_flags ISKNOW)
-                   cur_armor obj)
-             (add_pack obj t)
+             (setf obj (make-object :o-type  ARMOR 
+                                    :o-which RING-MAIL
+                                    :o-ac    (1- (aref a-class RING-MAIL))
+                                    :o-flags ISKNOW)
+                   cur-armor obj)
+             (add-pack obj t)
 
              ;; Give him some food too
-             (setf obj (make-object :o_type FOOD :o_count 1 :o_which 0))
-             (add_pack obj t)
+             (setf obj (make-object :o-type FOOD :o-count 1 :o-which 0))
+             (add-pack obj t)
              (playit)))
 
       ;; cleanup

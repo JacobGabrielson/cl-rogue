@@ -14,38 +14,38 @@
   (putfunc)                             ; function to print value 
   (getfunc))                    ; function to get value interactively 
 
-(defun put_bool (b)
+(defun put-bool (b)
   "Put out a boolean."
   (cl-ncurses:waddstr hw (if b "True" "False")))
 
-(defun put_str (str)
+(defun put-str (str)
   "Put out a string."
   (cl-ncurses:waddstr hw str))
 
-(defun get_bool (bp win)
+(defun get-bool (bp win)
   "Allow changing a boolean option and print it out."
   (let (oy
         ox
-        (op_bad t)
+        (op-bad t)
         (new-bp bp))
     (cl-ncurses:getyx win oy ox)
     (cl-ncurses:waddstr win (if bp "True" "False"))
-    (while op_bad
+    (while op-bad
       (cl-ncurses:wmove win oy ox)
       (draw win)
       (case (readchar)
         ((#\t #\T)
          (setf new-bp t
-               op_bad nil))
+               op-bad nil))
         ((#\f #\F)
          (setf new-bp nil
-               op_bad nil))
+               op-bad nil))
         ((#\Linefeed #\Return)
-         (setf op_bad nil))
+         (setf op-bad nil))
         ((#\Esc #\Bel)
-         (return-from get_bool (values new-bp QUIT)))
+         (return-from get-bool (values new-bp QUIT)))
         (#\-
-         (return-from get_bool (values new-bp MINUS)))
+         (return-from get-bool (values new-bp MINUS)))
         (otherwise
          (cl-ncurses:mvwaddstr win  oy (+ ox 10) "(T or F)"))))
     (cl-ncurses:wmove win oy ox)
@@ -53,7 +53,7 @@
     (rogue-waddch win #\Newline)
     (values new-bp NORM)))
 
-(defun get_str (opt win)
+(defun get-str (opt win)
   "Set a string option."
   (let (c oy ox (new-opt opt))
     (draw win)
@@ -120,14 +120,14 @@
                     '(:name :prompt :opt :putfunc :getfunc)
                     l)))
        (list
-        (list "terse" "Terse output: " 'terse #'put_bool #'get_bool)
-        (list "flush" "Flush typeahead during battle: " 'fight_flush #'put_bool #'get_bool)
-        (list "jump" "Show position only at end of run: " 'jump #'put_bool #'get_bool)
-        (list "step" "Do inventories one line at a time: " 'slow_invent #'put_bool #'get_bool)
-        (list "askme" "Ask me about unidentified things: " 'askme #'put_bool #'get_bool)
-        (list "name" "Name: " 'whoami #'put_str #'get_str)
-        (list "fruit" "Fruit: " 'fruit #'put_str #'get_str)
-        (list "file" "Save file: " 'file_name #'put_str #'get_str))))
+        (list "terse" "Terse output: " 'terse #'put-bool #'get-bool)
+        (list "flush" "Flush typeahead during battle: " 'fight-flush #'put-bool #'get-bool)
+        (list "jump" "Show position only at end of run: " 'jump #'put-bool #'get-bool)
+        (list "step" "Do inventories one line at a time: " 'slow-invent #'put-bool #'get-bool)
+        (list "askme" "Ask me about unidentified things: " 'askme #'put-bool #'get-bool)
+        (list "name" "Name: " 'whoami #'put-str #'get-str)
+        (list "fruit" "Fruit: " 'fruit #'put-str #'get-str)
+        (list "file" "Save file: " 'file-name #'put-str #'get-str))))
 
 (defun option ()
   "Print and then set options from the terminal."
@@ -167,7 +167,7 @@
                          0 
                          "--Press space to continue--")
   (draw hw)
-  (wait_for #\Space)
+  (wait-for #\Space)
   (cl-ncurses:clearok cw cl-ncurses:true)
   (cl-ncurses:touchwin cw)
   (setf *after* nil))
@@ -186,7 +186,7 @@ character long."
        (string= (subseq string 0 2) "no")
        (copy-seq (subseq string 2))))
 
-(defun parse_opts (optstr)
+(defun parse-opts (optstr)
   "Parse options from string, usually taken from the environment.
 the string is a series of comma-separated values, with booleans
 being stated as 'name' (true) or 'noname' (false), and strings

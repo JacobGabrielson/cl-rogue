@@ -32,7 +32,7 @@ is up there with the --More--)"
     (cl-ncurses:wmove cw 0 mpos)
     (cl-ncurses:waddstr cw "--More--")
     (draw cw)
-    (wait_for #\Space))
+    (wait-for #\Space))
   (cl-ncurses:mvwaddstr cw 0 0 msgbuf)
   (cl-ncurses:wclrtoeol cw)
   (setf mpos newpos
@@ -44,7 +44,7 @@ is up there with the --More--)"
   (setf msgbuf (concatenate 'string msgbuf (apply #'format nil args))
         newpos (length msgbuf)))
 
-(defun step_ok (ch)
+(defun step-ok (ch)
   "Returns true if it is ok to step on ch."
   (case ch
     ((#\Space #\| #\- #.SECRETDOOR) nil)
@@ -64,34 +64,34 @@ getchar."
 
 (let ((buf "")
       (hpwidth 0)
-      (s_hungry -1)
-      (s_lvl -1)
-      (s_pur 0)
-      (s_hp -1)
-      (s_str 0)
-      (s_add 0)
-      (s_ac 0)
-      (s_exp 0))
+      (s-hungry -1)
+      (s-lvl -1)
+      (s-pur 0)
+      (s-hp -1)
+      (s-str 0)
+      (s-add 0)
+      (s-ac 0)
+      (s-exp 0))
   (defun status ()
     "Display the important stats line.  Keep the cursor where it
 was."
     (unless 
         (and
-         (= s_hp (stats-s_hpt pstats))
-         (= s_exp (stats-s_exp pstats))
-         (= s_pur purse)
-         (= s_ac (if cur_armor 
-                     (object-o_ac cur_armor)
-                     (stats-s_arm pstats)))
-         (= s_str (str_t-st_str (stats-s_str pstats)))
-         (= s_add (str_t-st_add (stats-s_str pstats)))
-         (= s_lvl level)
-         (= s_hungry hungry_state))
+         (= s-hp (stats-s-hpt pstats))
+         (= s-exp (stats-s-exp pstats))
+         (= s-pur purse)
+         (= s-ac (if cur-armor 
+                     (object-o-ac cur-armor)
+                     (stats-s-arm pstats)))
+         (= s-str (str-t-st-str (stats-s-str pstats)))
+         (= s-add (str-t-st-add (stats-s-str pstats)))
+         (= s-lvl level)
+         (= s-hungry hungry-state))
       (let (oy ox temp)
         (cl-ncurses:getyx cw oy ox)
-        (unless (= s_hp max_hp)
-          (setf s_hp max_hp
-                temp s_hp
+        (unless (= s-hp max-hp)
+          (setf s-hp max-hp
+                temp s-hp
                 hpwidth 0)
           (do ()
               ((zerop (truncate temp)))
@@ -99,54 +99,54 @@ was."
             (incf hpwidth)))
         (setf buf (format nil 
                           "Level: ~d  Gold: ~5d  Hp: ~vd(~vd)  Str: ~2d"
-                          level purse hpwidth (stats-s_hpt pstats) hpwidth max_hp
-                          (str_t-st_str (stats-s_str pstats))))
-        (when (plusp (str_t-st_add (stats-s_str pstats)))
+                          level purse hpwidth (stats-s-hpt pstats) hpwidth max-hp
+                          (str-t-st-str (stats-s-str pstats))))
+        (when (plusp (str-t-st-add (stats-s-str pstats)))
           (setf buf (concatenate 'string buf 
-                                 (format nil "/~d" (str_t-st_add (stats-s_str pstats))))))
+                                 (format nil "/~d" (str-t-st-add (stats-s-str pstats))))))
         (setf buf (concatenate 'string buf 
                                (format nil "  Ac: ~2d  Exp: ~d/~d"
-                                       (if cur_armor 
-                                           (object-o_ac cur_armor)
-                                           (stats-s_arm pstats))
-                                       (stats-s_lvl pstats) (stats-s_exp pstats))))
+                                       (if cur-armor 
+                                           (object-o-ac cur-armor)
+                                           (stats-s-arm pstats))
+                                       (stats-s-lvl pstats) (stats-s-exp pstats))))
         ;;
         ;; Save old status
         ;; 
-        (setf s_lvl level
-              s_pur purse
-              s_hp (stats-s_hpt pstats)
-              s_str (str_t-st_str (stats-s_str pstats))
-              s_add (str_t-st_add (stats-s_str pstats))
-              s_exp (stats-s_exp pstats)
-              s_ac (if cur_armor 
-                       (object-o_ac cur_armor)
-                       (stats-s_arm pstats)))
+        (setf s-lvl level
+              s-pur purse
+              s-hp (stats-s-hpt pstats)
+              s-str (str-t-st-str (stats-s-str pstats))
+              s-add (str-t-st-add (stats-s-str pstats))
+              s-exp (stats-s-exp pstats)
+              s-ac (if cur-armor 
+                       (object-o-ac cur-armor)
+                       (stats-s-arm pstats)))
         (cl-ncurses:mvwaddstr cw (1- cl-ncurses:*lines*) 0 buf)
-        (cl-ncurses:waddstr cw (case hungry_state
+        (cl-ncurses:waddstr cw (case hungry-state
                                   (1 "  Hungry")
                                   (2 "  Weak")
                                   (3 "  Fainting")))
         (cl-ncurses:wclrtoeol cw)
-        (setf s_hungry hungry_state)
+        (setf s-hungry hungry-state)
         (cl-ncurses:wmove cw oy ox)))))
 
-(defun wait_for (ch)
+(defun wait-for (ch)
   "Sit around until the guy types the right key."
   (do ((c nil (readchar)))
       ((if (eql ch #\Newline)
            (or (eql c #\Newline) (eql c #\Linefeed))
            (eql c ch)))))
 
-(defun show_win (scr message)
+(defun show-win (scr message)
   "Display a window and wait before returning."
   (cl-ncurses:mvwaddstr scr 0 0 message)
   (cl-ncurses:touchwin scr)
   (cl-ncurses:wmove scr hero.y hero.x)
   (draw scr)
-  (wait_for #\Space)
+  (wait-for #\Space)
   (cl-ncurses:clearok cw 1)
   (cl-ncurses:touchwin cw))
 
-(defun flush_type ()
+(defun flush-type ()
   (cl-ncurses:flushinp))

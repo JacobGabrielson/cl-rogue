@@ -8,7 +8,7 @@
   isconn                            ; connection been made to room i? 
   ingraph)                              ; this room in graph already? 
 
-(defun do_passages ()
+(defun do-passages ()
   "Draw all the passages on a level."
   (let ((rdes-array
          (vector (make-rdes :conn #*010100000 :isconn #*000000000 :ingraph nil)
@@ -86,7 +86,7 @@
                        other-rm)
                     #\r #\d))
          (rpf (aref rooms rm))
-         rpt epos spos rmt distance turn_delta turn_distance turn_spot)
+         rpt epos spos rmt distance turn-delta turn-distance turn-spot)
     ;; Set up the movement variables, in two cases: first drawing one
     ;; down.
     (case direc
@@ -94,55 +94,55 @@
        (setf rmt (+ rm 3)                ; room # of dest
              rpt (aref rooms rmt)        ; room pointer of dest
              delta (make-coord :y 1) ; direction of move
-             spos (copy-structure (moor-r_pos rpf))  ; start of move
-             epos (copy-structure (moor-r_pos rpt))) ; end of move
-       (unless (logtest (moor-r_flags rpf) ISGONE) ; if not gone pick door pos
-         (incf (coord-x spos) (1+ (rnd (- (coord-x (moor-r_max rpf))
+             spos (copy-structure (moor-r-pos rpf))  ; start of move
+             epos (copy-structure (moor-r-pos rpt))) ; end of move
+       (unless (logtest (moor-r-flags rpf) ISGONE) ; if not gone pick door pos
+         (incf (coord-x spos) (1+ (rnd (- (coord-x (moor-r-max rpf))
                                           2))))
-         (incf (coord-y spos) (1- (coord-y (moor-r_max rpf)))))
-       (unless (logtest (moor-r_flags rpt) ISGONE)
-         (incf (coord-x epos) (1+ (rnd (- (coord-x (moor-r_max rpt)) 
+         (incf (coord-y spos) (1- (coord-y (moor-r-max rpf)))))
+       (unless (logtest (moor-r-flags rpt) ISGONE)
+         (incf (coord-x epos) (1+ (rnd (- (coord-x (moor-r-max rpt)) 
                                           2)))))
        (setf distance (1- (abs (- (coord-y spos)
                                   (coord-y epos)))) ; distance to move
-             turn_delta (make-coord     ; direction to turn
+             turn-delta (make-coord     ; direction to turn
                          :x (if (< (coord-x spos) 
                                    (coord-x epos)) 
                                 1 -1))
-             turn_distance (abs (- (coord-x spos) ; how far to turn
+             turn-distance (abs (- (coord-x spos) ; how far to turn
                                    (coord-x epos)))
-             turn_spot (1+ (rnd (1- distance))))) ; where turn starts
+             turn-spot (1+ (rnd (1- distance))))) ; where turn starts
       (#\r                              ; setup for moving right 
        (setf rmt (1+ rm)
              rpt (aref rooms rmt)
              delta (make-coord :x 1)
-             spos (copy-structure (moor-r_pos rpf))  ; start of move
-             epos (copy-structure (moor-r_pos rpt))) ; end of move
-       (unless (logtest (moor-r_flags rpf) ISGONE) ; if not gone pick door pos
-         (incf (coord-x spos) (1- (coord-x (moor-r_max rpf))))
-         (incf (coord-y spos) (1+ (rnd (- (coord-y (moor-r_max rpf)) 
+             spos (copy-structure (moor-r-pos rpf))  ; start of move
+             epos (copy-structure (moor-r-pos rpt))) ; end of move
+       (unless (logtest (moor-r-flags rpf) ISGONE) ; if not gone pick door pos
+         (incf (coord-x spos) (1- (coord-x (moor-r-max rpf))))
+         (incf (coord-y spos) (1+ (rnd (- (coord-y (moor-r-max rpf)) 
                                           2)))))
-       (unless (logtest (moor-r_flags rpt) ISGONE)
-         (incf (coord-y epos) (1+ (rnd (- (coord-y (moor-r_max rpt)) 
+       (unless (logtest (moor-r-flags rpt) ISGONE)
+         (incf (coord-y epos) (1+ (rnd (- (coord-y (moor-r-max rpt)) 
                                           2)))))
        (setf distance (1- (abs (- (coord-x spos)
                                   (coord-x epos)))) ; distance to move
-             turn_delta (make-coord     ; direction to turn
+             turn-delta (make-coord     ; direction to turn
                          :y (if (< (coord-y spos) 
                                    (coord-y epos)) 
                                 1 -1))
-             turn_distance (abs (- (coord-y spos) ; how far to turn
+             turn-distance (abs (- (coord-y spos) ; how far to turn
                                    (coord-y epos)))
-             turn_spot (1+ (rnd (1- distance)))))
+             turn-spot (1+ (rnd (1- distance)))))
       (otherwise (rogue-debug "error in connection tables")))
     ;; Draw in the doors on either side of the passage or just put #'s
     ;; if the rooms are gone.
-    (if (not (logtest (moor-r_flags rpf) ISGONE))
+    (if (not (logtest (moor-r-flags rpf) ISGONE))
         (add-door rpf spos)
         (progn
           (cmov spos)
           (rogue-addch #\#)))
-    (if (not (logtest (moor-r_flags rpt) ISGONE))
+    (if (not (logtest (moor-r-flags rpt) ISGONE))
         (add-door rpt epos)
         (progn
           (cmov epos)
@@ -154,14 +154,14 @@
         (incf (coord-x curr) delta.x)
         (incf (coord-y curr) delta.y)
         ;; Check if we are at the turn place, if so do the turn
-        (when (and (= distance turn_spot)
-                   (plusp turn_distance))
-          (while (plusp turn_distance)
-            (decf turn_distance)
+        (when (and (= distance turn-spot)
+                   (plusp turn-distance))
+          (while (plusp turn-distance)
+            (decf turn-distance)
             (cmov curr)
             (rogue-addch PASSAGE)
-            (incf (coord-x curr) (coord-x turn_delta))
-            (incf (coord-y curr) (coord-y turn_delta))))
+            (incf (coord-x curr) (coord-x turn-delta))
+            (incf (coord-y curr) (coord-y turn-delta))))
         ;; Continue digging along
         (cmov curr)
         (rogue-addch PASSAGE)
@@ -178,10 +178,10 @@ the exits array of the room."
   (rogue-addch (if (and (< (rnd 10) (1- level))
                         (< (rnd 100) 20))
                    SECRETDOOR DOOR))
-  (setf (aref (moor-r_exit rm) (moor-r_nexits rm)) (copy-structure cp))
-  (incf (moor-r_nexits rm)))
+  (setf (aref (moor-r-exit rm) (moor-r-nexits rm)) (copy-structure cp))
+  (incf (moor-r-nexits rm)))
 
-(defun add_pass ()
+(defun add-pass ()
   "Add the passages to the current window (wizard command)."
   (for (y 1 (- cl-ncurses:*lines* 3))
     (for (x 0 (1- cl-ncurses:*cols*))

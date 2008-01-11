@@ -3,7 +3,7 @@
 
 (in-package :cl-rogue)
 
-(defparameter w_names
+(defparameter w-names
   (vector
    "mace"
    "long sword"
@@ -18,7 +18,7 @@
    "crossbow bolt"
    "spear"))
 
-(defparameter init_dam
+(defparameter init-dam
   (vector
    (list "2d4" "1d3" 100 0)                  ; Mace  
    (list "1d10" "1d2" 100 0)                 ; Long sword 
@@ -36,100 +36,100 @@
 (defun missile (ydelta xdelta)
   "Fire a missile in a given direction."
   ;; Get which thing we are hurling
-  (when-let (obj (get_item "throw" WEAPON))
-    (symbol-macrolet ((obj->o_count (object-o_count obj)))
+  (when-let (obj (get-item "throw" WEAPON))
+    (symbol-macrolet ((obj->o-count (object-o-count obj)))
       (when (or (not (dropcheck obj))
-                (is_current obj))
+                (is-current obj))
         (return-from missile))
       ;; Get rid of the thing.  If it is a non-multiple item object,
       ;; or if it is the last thing, just drop it.  Otherwise, create
       ;; a new item with a count of one.
-      (if (< obj->o_count 2)
+      (if (< obj->o-count 2)
           (progn
             (detach pack obj)
             (decf inpack))
           (progn
-            (decf obj->o_count)
-            (when (zerop (object-o_group obj))
+            (decf obj->o-count)
+            (when (zerop (object-o-group obj))
               (decf inpack))
             (setf obj (copy-structure obj))
-            (setf obj->o_count 1)))
-      (do_motion obj ydelta xdelta)
+            (setf obj->o-count 1)))
+      (do-motion obj ydelta xdelta)
       ;; AHA! Here it has hit something.  If it is a wall or a door,
       ;; or if it misses (combat) the monster, put it on the floor
       (when (or (not (upper-case-p (rogue-mvwinch mw
-                                                  (coord-y (object-o_pos obj))
-                                                  (coord-x (object-o_pos obj)))))
-                (not (hit_monster (coord-y (object-o_pos obj))
-                                  (coord-x (object-o_pos obj)) obj)))
+                                                  (coord-y (object-o-pos obj))
+                                                  (coord-x (object-o-pos obj)))))
+                (not (hit-monster (coord-y (object-o-pos obj))
+                                  (coord-x (object-o-pos obj)) obj)))
         (fall obj t))
       (rogue-mvwaddch cw hero.y hero.x PLAYER))))
 
-(defun do_motion (obj ydelta xdelta)
+(defun do-motion (obj ydelta xdelta)
   "Do the actual motion on the screen done by an object traveling
 across the room."
   ;; Come fly with us ...
-  (symbol-macrolet ((obj->o_pos (object-o_pos obj))
-                    (obj->o_type (object-o_type obj))
-                    (obj->o_pos.x (coord-x (object-o_pos obj)))
-                    (obj->o_pos.y (coord-y (object-o_pos obj))))
+  (symbol-macrolet ((obj->o-pos (object-o-pos obj))
+                    (obj->o-type (object-o-type obj))
+                    (obj->o-pos.x (coord-x (object-o-pos obj)))
+                    (obj->o-pos.y (coord-y (object-o-pos obj))))
     ;; COPY-STRUCTURE needed to avoid moving the player!
-    (setf obj->o_pos (copy-structure hero))
+    (setf obj->o-pos (copy-structure hero))
 
     (loop
        ;; Erase the old one
-       (when (and (not (equalp obj->o_pos hero))
-                  (cansee obj->o_pos.y obj->o_pos.x)
-                  (not (eql (rogue-mvwinch cw obj->o_pos.y obj->o_pos.x)
+       (when (and (not (equalp obj->o-pos hero))
+                  (cansee obj->o-pos.y obj->o-pos.x)
+                  (not (eql (rogue-mvwinch cw obj->o-pos.y obj->o-pos.x)
                             #\Space)))
          (rogue-mvwaddch cw
-                         obj->o_pos.y
-                         obj->o_pos.x 
-                         (show obj->o_pos.y obj->o_pos.x)))
+                         obj->o-pos.y
+                         obj->o-pos.x 
+                         (show obj->o-pos.y obj->o-pos.x)))
        ;; Get the new position
-       (incf obj->o_pos.y ydelta)
-       (incf obj->o_pos.x xdelta)
-       (let ((ch (winat obj->o_pos.y obj->o_pos.x)))
-         (if (and (step_ok ch) 
+       (incf obj->o-pos.y ydelta)
+       (incf obj->o-pos.x xdelta)
+       (let ((ch (winat obj->o-pos.y obj->o-pos.x)))
+         (if (and (step-ok ch) 
                   (not (eql ch DOOR)))
              (progn
                ;; It hasn't hit anything yet, so display it if it's
                ;; alright.
-               (when (and (cansee obj->o_pos.y obj->o_pos.x)
-                          (not (eql (rogue-mvwinch cw obj->o_pos.y obj->o_pos.x) 
+               (when (and (cansee obj->o-pos.y obj->o-pos.x)
+                          (not (eql (rogue-mvwinch cw obj->o-pos.y obj->o-pos.x) 
                                     #\Space)))
-                 (rogue-mvwaddch cw obj->o_pos.y obj->o_pos.x obj->o_type)
+                 (rogue-mvwaddch cw obj->o-pos.y obj->o-pos.x obj->o-type)
                  (draw cw)))
-             (return-from do_motion))))))
+             (return-from do-motion))))))
 
 (defun fall (obj pr)
   "Drop an item someplace around here."
   (let ((fpos (make-coord)))
-    (when (fallpos (object-o_pos obj) fpos t)
-      (rogue-mvaddch (coord-y fpos) (coord-x fpos) (object-o_type obj))
-      (setf (object-o_pos obj) fpos)
+    (when (fallpos (object-o-pos obj) fpos t)
+      (rogue-mvaddch (coord-y fpos) (coord-x fpos) (object-o-type obj))
+      (setf (object-o-pos obj) fpos)
       (when-let (rp (roomin hero))
-        (when (not (logtest (moor-r_flags rp) ISDARK))
+        (when (not (logtest (moor-r-flags rp) ISDARK))
           (light hero)
           (rogue-mvwaddch cw hero.y hero.x PLAYER)))
-      (attach lvl_obj obj)
+      (attach lvl-obj obj)
       (return-from fall)))
   (when pr
-    (msg "Your ~a vanishes as it hits the ground." (aref w_names (object-o_which obj)))))
+    (msg "Your ~a vanishes as it hits the ground." (aref w-names (object-o-which obj)))))
 
-(defun init_weapon (weap type)
+(defun init-weapon (weap type)
   "Set up the initial goodies for a weapon."
-  (let ((iwp (aref init_dam type)))
-    (setf (object-o_damage weap)  (copy-seq (first iwp))
-          (object-o_hurldmg weap) (copy-seq (second iwp))
-          (object-o_launch weap)  (third iwp)
-          (object-o_flags weap)   (fourth iwp))
-    (if (logtest (object-o_flags weap) ISMANY)
-        (setf (object-o_count weap) (+ (rnd 8) 8)
-              (object-o_group weap) (newgrp))
-        (setf (object-o_count weap) 1))))
+  (let ((iwp (aref init-dam type)))
+    (setf (object-o-damage weap)  (copy-seq (first iwp))
+          (object-o-hurldmg weap) (copy-seq (second iwp))
+          (object-o-launch weap)  (third iwp)
+          (object-o-flags weap)   (fourth iwp))
+    (if (logtest (object-o-flags weap) ISMANY)
+        (setf (object-o-count weap) (+ (rnd 8) 8)
+              (object-o-group weap) (newgrp))
+        (setf (object-o-count weap) 1))))
 
-(defun hit_monster (y x obj)
+(defun hit-monster (y x obj)
   "Does the missile hit the monster?"
   (fight (make-coord :y y :x x) (winat y x) obj t))
 
@@ -151,31 +151,31 @@ across the room."
 
 (defun wield ()
   "Pull out a certain weapon."
-  (let ((oweapon cur_weapon))
-    (unless (dropcheck cur_weapon)
-      (setf cur_weapon oweapon)
+  (let ((oweapon cur-weapon))
+    (unless (dropcheck cur-weapon)
+      (setf cur-weapon oweapon)
       (return-from wield))
 
-    (setf cur_weapon oweapon)
-    (let ((obj (get_item "wield" WEAPON)))
+    (setf cur-weapon oweapon)
+    (let ((obj (get-item "wield" WEAPON)))
       (unless obj
         (setf *after* nil)
         (return-from wield))
 
-      (when (eql (object-o_type obj) ARMOR)
+      (when (eql (object-o-type obj) ARMOR)
         (msg "You can't wield armor")
         (setf *after* nil)
         (return-from wield))
 
-      (when (is_current obj)
+      (when (is-current obj)
         (setf *after* nil)
         (return-from wield))
 
       (if terse
           (addmsg "W")
           (addmsg "You are now w"))
-      (msg "ielding ~a" (inv_name obj t))
-      (setf cur_weapon obj))))
+      (msg "ielding ~a" (inv-name obj t))
+      (setf cur-weapon obj))))
 
 (defun fallpos (pos newpos passages)
   "Pick a random position around the given (y, x) coordinates."
