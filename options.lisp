@@ -194,8 +194,8 @@ being 'name=....', with the string being defined up to a comma or
 the end of the entire option string."
   (dolist (setting
             (mapcar #'(lambda (x)
-                        (asdf::split x most-positive-fixnum '(#\= #\Space #\Tab)))
-                    (asdf::split optstr most-positive-fixnum '(#\, #\Space #\Tab))))
+                        (asdf::split-string x :separator '(#\= #\Space #\Tab)))
+                    (asdf::split-string optstr :separator '(#\, #\Space #\Tab))))
     ;; setting = (list optname [value-if-string])
     (let* ((optname (first setting))
            (try-opt (find-option optname))
