@@ -117,7 +117,7 @@
                                    (thing-t-pos tp))
                           (when (eql (winat (coord-y (thing-t-pos tp))
                                            (coord-x (thing-t-pos tp)))
-                                    FLOOR))))
+                                    THE-FLOOR))))
                       (otherwise
                        (setf (thing-t-pos tp) (make-coord :y (+ hero.y delta.y)
                                                           :x (+ hero.x delta.x)))))

@@ -60,7 +60,7 @@
     (setf sch (rogue-mvwinch cw (coord-y ch-ret) (coord-x ch-ret)))
     (if (and rer
              (logtest (moor-r-flags rer) ISDARK)
-             (eql sch FLOOR)
+             (eql sch THE-FLOOR)
              (< (distance (coord-y ch-ret) 
                           (coord-x ch-ret) 
                           (coord-y (thing-t-pos th)) 

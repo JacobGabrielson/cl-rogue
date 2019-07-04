@@ -93,7 +93,7 @@
                  (when (eq (rogue-mvwinch cl-ncurses:*stdscr*
                                           (coord-y mp)
                                           (coord-x mp))
-                           FLOOR)
+                           THE-FLOOR)
                    (return)))
               (new-monster tp (randmonster nil) mp)
 
@@ -136,7 +136,7 @@
       (cl-ncurses:move (+ py j) (1+ px))
       (do ((k 1 (1+ k)))
           ((>= k (1- mx)))
-        (rogue-addch FLOOR)))
+        (rogue-addch THE-FLOOR)))
     ;; Put the gold there
     (when (plusp (moor-r-goldval rp))
       (rogue-mvaddch (coord-y (moor-r-gold rp))

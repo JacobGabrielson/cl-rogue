@@ -123,8 +123,8 @@ that might move."
                   (case rch
                     ((#.DOOR #.STAIRS #.TRAP #\| #\- #\Space)
                      rch)
-                    (#.FLOOR
-                     (if (on *player* ISBLIND) FLOOR #\Space))
+                    (#.THE-FLOOR
+                     (if (on *player* ISBLIND) THE-FLOOR #\Space))
                     (otherwise
                      #\Space))))
                (t ch)))))))))
@@ -138,7 +138,7 @@ un-initiated."
       (#.TRAP
        (if (logtest (rogue-trap-tr-flags (trap-at y x)) ISFOUND)
            TRAP 
-           FLOOR))
+           THE-FLOOR))
       ((#\M #\I)
        (let ((tp (find-mons y x)))
          (unless tp

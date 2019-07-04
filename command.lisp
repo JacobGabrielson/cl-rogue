@@ -340,7 +340,7 @@
            (#.GOLD "gold")
            (#.STAIRS "passage leading down")
            (#.DOOR "door")
-           (#.FLOOR "room floor")
+           (#.THE-FLOOR "room floor")
            (#.PLAYER "you")
            (#.PASSAGE "passage")
            (#.TRAP "trap")

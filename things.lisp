@@ -148,7 +148,7 @@ inventory."
              (incf purse (moor-r-goldval rp))
              (zero! (moor-r-goldval rp))
              (cmov (moor-r-gold rp))
-             (rogue-addch FLOOR)
+             (rogue-addch THE-FLOOR)
              (return-from money)))
        rooms)
   (msg "That gold must have been counterfeit"))
@@ -156,7 +156,7 @@ inventory."
 (defun drop ()
   "Put something down."
   (let ((ch (rogue-mvwinch cl-ncurses:*stdscr* hero.y hero.x)))
-    (when (and (not (eql ch FLOOR))
+    (when (and (not (eql ch THE-FLOOR))
                (not (eql ch PASSAGE)))
       (msg "There is something there already")
       (return-from drop))

@@ -103,7 +103,7 @@
       (loop
          (setf rm (rnd-room))
          (rnd-pos (aref rooms rm) hero)
-         (when (eql (winat hero.y hero.x) FLOOR) 
+         (when (eql (winat hero.y hero.x) THE-FLOOR) 
            (return)))
       (light c)
       (light hero)

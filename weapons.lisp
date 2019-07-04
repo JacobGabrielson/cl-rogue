@@ -187,7 +187,7 @@ across the room."
         ;; if he can see it.
         (unless (and (= y hero.y) (= x hero.x))
           (let ((ch (winat y x)))
-            (when (or (eql ch FLOOR)
+            (when (or (eql ch THE-FLOOR)
                       (and passages
                            (eql ch PASSAGE)))
               (incf cnt)

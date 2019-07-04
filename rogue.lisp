@@ -19,7 +19,7 @@
 ;;; Things that appear on the screens
 (defconstant PASSAGE #\#)
 (defconstant DOOR #\+)
-(defconstant FLOOR #\.)
+(defconstant THE-FLOOR #\.)
 (defconstant PLAYER #\@)
 (defconstant TRAP #\^)
 (defconstant TRAPDOOR #\>)

@@ -93,7 +93,7 @@ off the ground."
             (detach lvl-obj obj)
             (rogue-mvaddch hero.y hero.x
                            (if (roomin hero)
-                               FLOOR
+                               THE-FLOOR
                                PASSAGE)))
           (setf picked-up t))))
     (unless picked-up
@@ -109,14 +109,14 @@ off the ground."
             (progn
               (msg "The scroll turns to dust as you pick it up.")
               (detach lvl-obj obj)
-              (rogue-mvaddch hero.y hero.x FLOOR)
+              (rogue-mvaddch hero.y hero.x THE-FLOOR)
               (return-from add-pack))
             (logior! (object-o-flags obj) ISFOUND)))
 
       (incf inpack)
       (when from-floor
         (detach lvl-obj obj)
-        (rogue-mvaddch hero.y hero.x (if (roomin hero) FLOOR PASSAGE)))
+        (rogue-mvaddch hero.y hero.x (if (roomin hero) THE-FLOOR PASSAGE)))
       (insert-pack obj))
 
     ;; Notify the user
