@@ -159,13 +159,13 @@ off the ground."
                       (if slow-invent
                           (msg inv-temp)
                           (progn
-                            (cl-ncurses:wclear hw)
-                            (cl-ncurses:waddstr hw inv-temp)
+                            (cl-charms/low-level:wclear hw)
+                            (cl-charms/low-level:waddstr hw inv-temp)
                             (rogue-waddch hw #\Newline))))
                     ;; Print the line for this object
                     (if slow-invent
                         (msg "~a) ~a" ch (inv-name obj nil))
-                        (cl-ncurses:wprintw hw (format nil "~a) ~a~%" ch (inv-name obj nil))))))))))
+                        (cl-charms/low-level:wprintw hw (format nil "~a) ~a~%" ch (inv-name obj nil))))))))))
 
     (when (zerop n-objs)
       (msg (if terse
@@ -182,16 +182,16 @@ off the ground."
       (return-from inventory t))
 
     (unless slow-invent
-      (cl-ncurses:mvwaddstr hw (1- cl-ncurses:*lines*) 0 "--Press space to continue--")
-      (cl-ncurses:wrefresh hw)
+      (cl-charms/low-level:mvwaddstr hw (1- cl-charms/low-level:*lines*) 0 "--Press space to continue--")
+      (cl-charms/low-level:wrefresh hw)
       ;; If we don't do this, then, if CW happens to have its x,y
       ;; coords set to 0,0 we will end up nuking the first line (not
       ;; sure why exactly, should happen in the C version too, but
       ;; presumably does not.
       (let ((*input-window* hw))
         (wait-for #\Space))
-      (cl-ncurses:clearok cw cl-ncurses:true)
-      (cl-ncurses:touchwin cw))
+      (cl-charms/low-level:clearok cw cl-charms/low-level:true)
+      (cl-charms/low-level:touchwin cw))
 
     t))
 

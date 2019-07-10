@@ -28,7 +28,7 @@
         sch
         (this (thing-t-dest th)))  ; temporary destination for chaser 
     ;; We don't count doors as inside rooms for this routine
-    (when (eql (rogue-mvwinch cl-ncurses:*stdscr* (coord-y (thing-t-pos th)) (coord-x (thing-t-pos th)))
+    (when (eql (rogue-mvwinch cl-charms/low-level:*stdscr* (coord-y (thing-t-pos th)) (coord-x (thing-t-pos th)))
                DOOR)
       (setf rer nil))
     ;; If the object of our desire is in a different room than we are,

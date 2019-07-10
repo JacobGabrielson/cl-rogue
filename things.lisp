@@ -155,7 +155,7 @@ inventory."
 
 (defun drop ()
   "Put something down."
-  (let ((ch (rogue-mvwinch cl-ncurses:*stdscr* hero.y hero.x)))
+  (let ((ch (rogue-mvwinch cl-charms/low-level:*stdscr* hero.y hero.x)))
     (when (and (not (eql ch THE-FLOOR))
                (not (eql ch PASSAGE)))
       (msg "There is something there already")

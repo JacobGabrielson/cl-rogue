@@ -57,8 +57,8 @@
        ;;
        (if mlist
            (progn
-             (cl-ncurses:wclear hw)
-             (cl-ncurses:overwrite mw hw)
+             (cl-charms/low-level:wclear hw)
+             (cl-charms/low-level:overwrite mw hw)
              (show-win hw "You begin to sense the presence of monsters.--More--")
              (setf (aref p-know P-MFIND) t)) ;
            (msg "You have a strange feeling for a moment, then it passes.")))
@@ -68,7 +68,7 @@
        ;;
        (let (show)
          (when lvl-obj
-           (cl-ncurses:wclear hw)
+           (cl-charms/low-level:wclear hw)
            (dolist (tp lvl-obj)
              (when (is-magic tp)
                (setf show t)

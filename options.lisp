@@ -16,11 +16,11 @@
 
 (defun put-bool (b)
   "Put out a boolean."
-  (cl-ncurses:waddstr hw (if b "True" "False")))
+  (cl-charms/low-level:waddstr hw (if b "True" "False")))
 
 (defun put-str (str)
   "Put out a string."
-  (cl-ncurses:waddstr hw str))
+  (cl-charms/low-level:waddstr hw str))
 
 (defun get-bool (bp win)
   "Allow changing a boolean option and print it out."
@@ -28,10 +28,10 @@
         ox
         (op-bad t)
         (new-bp bp))
-    (cl-ncurses:getyx win oy ox)
-    (cl-ncurses:waddstr win (if bp "True" "False"))
+    (cl-charms/low-level:getyx win oy ox)
+    (cl-charms/low-level:waddstr win (if bp "True" "False"))
     (while op-bad
-      (cl-ncurses:wmove win oy ox)
+      (cl-charms/low-level:wmove win oy ox)
       (draw win)
       (case (readchar)
         ((#\t #\T)
@@ -47,9 +47,9 @@
         (#\-
          (return-from get-bool (values new-bp MINUS)))
         (otherwise
-         (cl-ncurses:mvwaddstr win  oy (+ ox 10) "(T or F)"))))
-    (cl-ncurses:wmove win oy ox)
-    (cl-ncurses:waddstr win (if bp "True" "False"))
+         (cl-charms/low-level:mvwaddstr win  oy (+ ox 10) "(T or F)"))))
+    (cl-charms/low-level:wmove win oy ox)
+    (cl-charms/low-level:waddstr win (if bp "True" "False"))
     (rogue-waddch win #\Newline)
     (values new-bp NORM)))
 
@@ -57,7 +57,7 @@
   "Set a string option."
   (let (c oy ox (new-opt opt))
     (draw win)
-    (cl-ncurses:getyx win oy ox)
+    (cl-charms/low-level:getyx win oy ox)
     ;; Loop reading in the string, and put it in a temporary buffer
     (let ((sp 0)
           (buf (copy-seq "")))
@@ -67,37 +67,37 @@
            (case c
              ((#\Linefeed #\Return #\Esc #\Bel)
               (return)))
-           (cl-ncurses:wclrtoeol win)
+           (cl-charms/low-level:wclrtoeol win)
            (draw win)
            (cond
              ((null c) (return-from continue))
-             ((eql c (code-char (cl-ncurses:erasechar)))
+             ((eql c (code-char (cl-charms/low-level:erasechar)))
               (when (plusp sp)
                 (decf sp)
                 (dotimes (_ (length (unctrl-char (aref buf sp))))
                   (rogue-waddch win #\Backspace)))
               (return-from continue))
-             ((eql c (code-char (cl-ncurses:killchar)))
+             ((eql c (code-char (cl-charms/low-level:killchar)))
               (zero! sp)
-              (cl-ncurses:wmove win oy ox)
+              (cl-charms/low-level:wmove win oy ox)
               (return-from continue))
              ((zerop sp)
               (if (eql c #\-)
                   (return)
                   (when (eql c #\~)
                     (setf buf (copy-seq home))
-                    (cl-ncurses:waddstr win home)
+                    (cl-charms/low-level:waddstr win home)
                     (incf sp (length home))
                     (return-from continue)))))
            (setf buf (concatenate 'string buf (format nil "~c" c)))
            (incf sp)
-           (cl-ncurses:waddstr win (unctrl-char c))))
+           (cl-charms/low-level:waddstr win (unctrl-char c))))
 
       (when (plusp sp) ; only change option if something has been typed
         (setf new-opt (strucpy buf (length buf))))
 
-      (cl-ncurses:wmove win oy ox) 
-      (cl-ncurses:waddstr win new-opt)
+      (cl-charms/low-level:wmove win oy ox) 
+      (cl-charms/low-level:waddstr win new-opt)
       (rogue-waddch win #\Newline)
       (draw win)
 
@@ -131,20 +131,20 @@
 
 (defun option ()
   "Print and then set options from the terminal."
-  (cl-ncurses:wclear hw)
-  (cl-ncurses:touchwin hw)
+  (cl-charms/low-level:wclear hw)
+  (cl-charms/low-level:touchwin hw)
   ;; Display current values of options
   (map nil
        #'(lambda (op)
-           (cl-ncurses:waddstr hw (option-prompt op))
+           (cl-charms/low-level:waddstr hw (option-prompt op))
            (funcall (option-putfunc op) (symbol-value (option-opt op)))
            (rogue-waddch hw #\Newline))
        *options*)
   ;;* Set values
-  (cl-ncurses:wmove hw 0 0)
+  (cl-charms/low-level:wmove hw 0 0)
   (for (i 0 (1- (length *options*)))
     (let ((op (aref *options* i)))
-      (cl-ncurses:waddstr hw (option-prompt op))
+      (cl-charms/low-level:waddstr hw (option-prompt op))
       (multiple-value-bind (new-value status) 
           (funcall (option-getfunc op) (symbol-value (option-opt op)) hw)
         (setf (symbol-value (option-opt op)) new-value)
@@ -155,21 +155,21 @@
           (otherwise                    ; MINUS
            (if (plusp i)
                (progn
-                 (cl-ncurses:wmove hw (1- i) 0)
+                 (cl-charms/low-level:wmove hw (1- i) 0)
                  (decf i 2))
                (progn               ; trying to back up beyond the top
                  (format t "~a" #\Bel)
-                 (cl-ncurses:wmove hw 0 0)
+                 (cl-charms/low-level:wmove hw 0 0)
                  (decf i 1))))))))
   ;; Switch back to original screen
-  (cl-ncurses:mvwaddstr hw 
-                         (1- cl-ncurses:*lines*) 
+  (cl-charms/low-level:mvwaddstr hw 
+                         (1- cl-charms/low-level:*lines*) 
                          0 
                          "--Press space to continue--")
   (draw hw)
   (wait-for #\Space)
-  (cl-ncurses:clearok cw cl-ncurses:true)
-  (cl-ncurses:touchwin cw)
+  (cl-charms/low-level:clearok cw cl-charms/low-level:true)
+  (cl-charms/low-level:touchwin cw)
   (setf *after* nil))
 
 (defun find-option (name)

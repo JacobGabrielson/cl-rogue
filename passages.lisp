@@ -183,8 +183,8 @@ the exits array of the room."
 
 (defun add-pass ()
   "Add the passages to the current window (wizard command)."
-  (for (y 1 (- cl-ncurses:*lines* 3))
-    (for (x 0 (1- cl-ncurses:*cols*))
+  (for (y 1 (- cl-charms/low-level:*lines* 3))
+    (for (x 0 (1- cl-charms/low-level:*cols*))
       (let ((ch (rogue-mvinch y x)))
         (case ch 
           ((#.PASSAGE #.DOOR #.SECRETDOOR)

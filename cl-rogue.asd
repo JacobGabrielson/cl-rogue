@@ -7,8 +7,8 @@
 
 (in-package :cl-rogue-asd)
 
-(defsystem :cl-rogue
-           :version "0.0.1"
+(defsystem "cl-rogue"
+           :version "0.0.2"
            :maintainer "Jacob Gabrielson <jacobg23@pobox.com>"
            :license "MIT"
            :depends-on (:cl-ncurses :sb-posix)

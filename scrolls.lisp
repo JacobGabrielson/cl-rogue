@@ -86,10 +86,10 @@
          ;; Scroll of magic mapping.
          (setf (aref s-know S-MAP) t)
          (msg "Oh, now this scroll has a map on it.")
-         (cl-ncurses:overwrite cl-ncurses:*stdscr* hw)
+         (cl-charms/low-level:overwrite cl-charms/low-level:*stdscr* hw)
          ;; Take all the things we want to keep hidden out of the window
-         (dotimes (i cl-ncurses:*lines*)
-           (dotimes (j cl-ncurses:*cols*)
+         (dotimes (i cl-charms/low-level:*lines*)
+           (dotimes (j cl-charms/low-level:*cols*)
              (let* ((ch (rogue-mvwinch hw i j))
                     (nch ch))
                (case ch
@@ -111,17 +111,17 @@
                (unless (eql nch ch)
                  (rogue-waddch hw nch)))))
          ;; Copy in what he has discovered
-         (cl-ncurses:overlay cw hw)
+         (cl-charms/low-level:overlay cw hw)
          ;; And set up for display
-         (cl-ncurses:overwrite hw cw))
+         (cl-charms/low-level:overwrite hw cw))
         (#.S-GFIND
          ;; Potion of gold detection
          (let ((gtotal 0))
-           (cl-ncurses:wclear hw)
+           (cl-charms/low-level:wclear hw)
            (dotimes (i MAXROOMS)
              (incf gtotal (moor-r-goldval (aref rooms i)))
              (when (and (not (zerop (moor-r-goldval (aref rooms i))))
-                        (eql (rogue-mvwinch cl-ncurses:*stdscr*
+                        (eql (rogue-mvwinch cl-charms/low-level:*stdscr*
                                            (coord-y (moor-r-gold (aref rooms i)))
                                            (coord-x (moor-r-gold (aref rooms i))))
                             GOLD))

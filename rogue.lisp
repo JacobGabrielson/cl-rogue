@@ -206,7 +206,7 @@
 
 (defun winat (y x)
   (if (eql (rogue-mvwinch mw y x) #\Space)
-      (rogue-mvwinch cl-ncurses:*stdscr* y x)
+      (rogue-mvwinch cl-charms/low-level:*stdscr* y x)
       (rogue-winch mw)))
 (defun rogue-debug (&rest args)
 ;;  (apply #'error args))
@@ -214,9 +214,9 @@
   (apply #'msg args))
 
 
-;; should come from cl-ncurses...
+;; should come from cl-charms/low-level...
 (defun move (y x)
-  (cl-ncurses:wmove cl-ncurses:*stdscr* y x))
+  (cl-charms/low-level:wmove cl-charms/low-level:*stdscr* y x))
 
 (defun cmov (xy)
   (move (coord-y xy)
@@ -229,7 +229,7 @@
         (- y2 y1))))
 
 (defun draw (window)
-  (cl-ncurses:wrefresh window))
+  (cl-charms/low-level:wrefresh window))
 
 (define-symbol-macro hero.x (coord-x (thing-t-pos *player*)))
 (define-symbol-macro hero.y (coord-y (thing-t-pos *player*)))
@@ -427,13 +427,13 @@ cards."
                  (make-list (length places) :initial-element 0))))
   `(setf ,@zeroed-places)))
 
-;; Really should come from cl-ncurses
+;; Really should come from cl-charms/low-level
 (defun ctrl (ch) 
   (code-char (logand (char-int ch) #o37)))
 
 (defun unctrl-char (c)
   ;; XXX: this doesn't actually handle control chars as it should??
-  ;; (I couldn't get cl-ncurses' unctrl to work).
+  ;; (I couldn't get cl-charms/low-level' unctrl to work).
   (format nil "~:c" c))
 
 (defun >1 (number)
@@ -449,25 +449,25 @@ cards."
       (code-char code)))
 
 (defun rogue-addch (ch)
-  (cl-ncurses:addch (char-code ch)))
+  (cl-charms/low-level:addch (char-code ch)))
 
 (defun rogue-waddch (win ch)
-  (cl-ncurses:waddch win (char-code ch)))
+  (cl-charms/low-level:waddch win (char-code ch)))
     
 (defun rogue-mvaddch (y x ch)
-  (cl-ncurses:mvaddch y x (char-code ch)))
+  (cl-charms/low-level:mvaddch y x (char-code ch)))
 
 (defun rogue-mvwaddch (win y x ch)
-  (cl-ncurses:mvwaddch win y x (char-code ch)))
+  (cl-charms/low-level:mvwaddch win y x (char-code ch)))
 
 (defun rogue-winch (win)
-  (rogue-code-char (cl-ncurses:winch win)))
+  (rogue-code-char (cl-charms/low-level:winch win)))
 
 (defun rogue-mvinch (y x)
-  (rogue-code-char (cl-ncurses:mvinch y x)))
+  (rogue-code-char (cl-charms/low-level:mvinch y x)))
 
 (defun rogue-mvwinch (win y x)
-  (rogue-code-char (cl-ncurses:mvwinch win y x)))
+  (rogue-code-char (cl-charms/low-level:mvwinch win y x)))
 
 (defvar *resettable-symbols* '())
 

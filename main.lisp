@@ -62,77 +62,84 @@
     (init-colors)                       ; set up colors of potions 
     (init-stones)                    ; set up stone settings of rings 
     (init-materials)                    ; set up materials of wands 
-    (unwind-protect
-         (progn
-           (cl-ncurses:initscr)         ; start up cursor package 
 
-           (when (< cl-ncurses:*cols*  70)
-             (format t "~%~%Sorry, ~a, but your terminal window has too few columns.~%" whoami)
-             (format t "Your terminal has ~a columns, needs 70.~%" cl-ncurses:*cols*)
-             (cl-ncurses:endwin)
-             (return-from rogue))
+    (charms:with-curses ()
 
-           (when (< cl-ncurses:*lines* 22)
-             (format t "~%~%Sorry, ~a, but your terminal window has too few lines.~%" whoami)
-             (format t "Your terminal has ~d lines, needs 22.~%" cl-ncurses:*lines*)
-             (cl-ncurses:endwin)
-             (return-from rogue))
+      (unwind-protect
+	   (progn
+	     (cl-charms/low-level:initscr)         ; start up cursor package 
+	     
+	     (when (< cl-charms/low-level:*cols*  70)
+	       (format t "~%~%Sorry, ~a, but your terminal window has too few columns.~%" whoami)
+	       (format t "Your terminal has ~a columns, needs 70.~%" cl-charms/low-level:*cols*)
+	       (cl-charms/low-level:endwin)
+	       (return-from rogue))
 
-           (setup)
-           ;; Set up windows
-           (setf cw (cl-ncurses:newwin cl-ncurses:*lines* cl-ncurses:*cols* 0 0)
-                 mw (cl-ncurses:newwin cl-ncurses:*lines* cl-ncurses:*cols* 0 0)
-                 hw (cl-ncurses:newwin cl-ncurses:*lines* cl-ncurses:*cols* 0 0)
-                 waswizard wizard)
-           (new-level)                  ; Draw current level 
-           ;; Start up daemons and fuses
-           (daemon 'doctor 0 AFTER)
-           (fuse 'swander 0 WANDERTIME AFTER)
-           (daemon 'stomach 0 AFTER)
-           (daemon 'runners 0 AFTER)
-           ;; Give the rogue his weaponry.  First a mace.
-           (let (obj)
-             (setf obj (make-object :o-type WEAPON :o-which MACE))
-             (init-weapon obj MACE)
-             (setf (object-o-hplus obj) 1
-                   (object-o-dplus obj) 1
-                   (object-o-flags obj) (logior (object-o-flags obj) ISKNOW))
-             (add-pack obj t)
-             (setf cur-weapon obj)
+	     (when (< cl-charms/low-level:*lines* 22)
+	       (format t "~%~%Sorry, ~a, but your terminal window has too few lines.~%" whoami)
+	       (format t "Your terminal has ~d lines, needs 22.~%" cl-charms/low-level:*lines*)
+	       (cl-charms/low-level:endwin)
+	       (return-from rogue))
 
-             ;; Now a +1 bow
-             (setf obj (make-object :o-type WEAPON :o-which BOW))
-             (init-weapon obj BOW)
-             (setf (object-o-hplus obj) 1
-                   (object-o-dplus obj) 0
-                   (object-o-flags obj) (logior (object-o-flags obj) ISKNOW))
-             (add-pack obj t)
+	     (setup)
 
-             ;; Now some arrows
-             (setf obj (make-object :o-type WEAPON :o-which ARROW))
-             (init-weapon obj ARROW)
-             (setf (object-o-count obj) (+ 25 (rnd 15))
-                   (object-o-hplus obj) 0
-                   (object-o-dplus obj) 0
-                   (object-o-flags obj) (logior (object-o-flags obj) ISKNOW))
-             (add-pack obj t)
+	     ;; Set up windows
+	     (setf cw (cl-charms/low-level:newwin cl-charms/low-level:*lines* cl-charms/low-level:*cols* 0 0)
+		   mw (cl-charms/low-level:newwin cl-charms/low-level:*lines* cl-charms/low-level:*cols* 0 0)
+		   hw (cl-charms/low-level:newwin cl-charms/low-level:*lines* cl-charms/low-level:*cols* 0 0)
+		   waswizard wizard)
 
-             ;; And his suit of armor
-             (setf obj (make-object :o-type  ARMOR 
-                                    :o-which RING-MAIL
-                                    :o-ac    (1- (aref a-class RING-MAIL))
-                                    :o-flags ISKNOW)
-                   cur-armor obj)
-             (add-pack obj t)
+	     (new-level)                  ; Draw current level 
 
-             ;; Give him some food too
-             (setf obj (make-object :o-type FOOD :o-count 1 :o-which 0))
-             (add-pack obj t)
-             (playit)))
+	     ;; Start up daemons and fuses
+	     (daemon 'doctor 0 AFTER)
+	     (fuse 'swander 0 WANDERTIME AFTER)
+	     (daemon 'stomach 0 AFTER)
+	     (daemon 'runners 0 AFTER)
+	     ;; Give the rogue his weaponry.  First a mace.
+	     (let (obj)
+	       (setf obj (make-object :o-type WEAPON :o-which MACE))
+	       (init-weapon obj MACE)
+	       (setf (object-o-hplus obj) 1
+		     (object-o-dplus obj) 1
+		     (object-o-flags obj) (logior (object-o-flags obj) ISKNOW))
+	       (add-pack obj t)
+	       (setf cur-weapon obj)
 
-      ;; cleanup
-      (cl-ncurses:endwin))))
-      
+	       ;; Now a +1 bow
+	       (setf obj (make-object :o-type WEAPON :o-which BOW))
+	       (init-weapon obj BOW)
+	       (setf (object-o-hplus obj) 1
+		     (object-o-dplus obj) 0
+		     (object-o-flags obj) (logior (object-o-flags obj) ISKNOW))
+	       (add-pack obj t)
+
+	       ;; Now some arrows
+	       (setf obj (make-object :o-type WEAPON :o-which ARROW))
+	       (init-weapon obj ARROW)
+	       (setf (object-o-count obj) (+ 25 (rnd 15))
+		     (object-o-hplus obj) 0
+		     (object-o-dplus obj) 0
+		     (object-o-flags obj) (logior (object-o-flags obj) ISKNOW))
+	       (add-pack obj t)
+
+	       ;; And his suit of armor
+	       (setf obj (make-object :o-type  ARMOR 
+				      :o-which RING-MAIL
+				      :o-ac    (1- (aref a-class RING-MAIL))
+				      :o-flags ISKNOW)
+		     cur-armor obj)
+	       (add-pack obj t)
+
+	       ;; Give him some food too
+	       (setf obj (make-object :o-type FOOD :o-count 1 :o-which 0))
+	       (add-pack obj t)
+
+	       (playit)))
+
+	;; cleanup
+	(cl-charms/low-level:endwin)))))
+
 
 (defun endit ()
   "Exit the program abnormally."
@@ -140,10 +147,10 @@
 
 (defun fatal (s)
   "Exit the program, printing a message."
-  (cl-ncurses:clear)
-  (cl-ncurses:move (- cl-ncurses:*lines* 2) 0)
-  (cl-ncurses:printw s)
-  (draw cl-ncurses:*stdscr*)
+  (cl-charms/low-level:clear)
+  (cl-charms/low-level:move (- cl-charms/low-level:*lines* 2) 0)
+  (cl-charms/low-level:printw s)
+  (draw cl-charms/low-level:*stdscr*)
   (rogue-done))
 
 (defun roll (number sides)
@@ -152,8 +159,8 @@
       ((zerop (prog1 number (decf number))) dtotal)))
 
 (defun setup ()
-  (cl-ncurses:cbreak)
-  (cl-ncurses:noecho))
+  (cl-charms/low-level:cbreak)
+  (cl-charms/low-level:noecho))
 
 (defun playit ()
   "The main loop of the program.  Loop until the game is over,

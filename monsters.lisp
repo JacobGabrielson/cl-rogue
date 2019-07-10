@@ -72,7 +72,7 @@ the monster."
        (setf i (rnd-room))
        (when (not (eql (setf rp (aref rooms i)) hr))
          (rnd-pos rp cp)
-         (setf ch (rogue-mvwinch cl-ncurses:*stdscr* (coord-y cp) (coord-x cp)))
+         (setf ch (rogue-mvwinch cl-charms/low-level:*stdscr* (coord-y cp) (coord-x cp)))
          (when (eql ch 'err)   ; XXX: figure out what ERR is in c world
            (rogue-debug "Routine wanderer: mvwinch failed to ~d,~d" (coord-y cp) (coord-x cp))
            (wait-for #\Newline)
@@ -120,7 +120,7 @@ the monster."
           (setf (thing-t-flags tp) (logior (thing-t-flags tp) ISFOUND))))
       ;; Hide invisible monsters
       (when (and (on tp ISINVIS) (off *player* CANSEE))
-        (setf ch (rogue-mvwinch cl-ncurses:*stdscr* y x)))
+        (setf ch (rogue-mvwinch cl-charms/low-level:*stdscr* y x)))
 
       ;; Let greedy ones guard gold
       (when (and (on tp ISGREED) 

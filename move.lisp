@@ -30,9 +30,9 @@ consequences (fighting, picking up, etc."
   ;; Check if he tried to move off the screen or make an illegal
   ;; diagonal move, and stop him if he did.
   (when (or (minusp (coord-x nh))
-            (> (coord-x nh) (1- cl-ncurses:*cols*))
+            (> (coord-x nh) (1- cl-charms/low-level:*cols*))
             (minusp (coord-y nh))
-            (> (coord-y nh) (1- cl-ncurses:*lines*))
+            (> (coord-y nh) (1- cl-charms/low-level:*lines*))
             (not (diag-ok hero nh)))
     (setf *after* nil
           running nil)
@@ -78,10 +78,10 @@ consequences (fighting, picking up, etc."
        (return-from do-move)))
 
     (setf ch (winat hero.y hero.x))
-    (cl-ncurses::wmove cw hero.y hero.x)
+    (cl-charms/low-level::wmove cw hero.y hero.x)
     (rogue-waddch cw ch)
     (setf hero (copy-structure nh))     ; COPY-STRUCTURE for paranoia
-    (cl-ncurses::wmove cw hero.y hero.x)
+    (cl-charms/low-level::wmove cw hero.y hero.x)
     (rogue-waddch cw PLAYER)))
 
 (defun light (cp)
@@ -97,7 +97,7 @@ that might move."
                         j))
                  (ch (show dy dx))
                  (darkp (logtest (moor-r-flags rp) ISDARK)))
-            (cl-ncurses::wmove cw dy dx)
+            (cl-charms/low-level::wmove cw dy dx)
             ;; Figure out how to display a secret door.
             (when (eql ch SECRETDOOR)
               (setf ch
@@ -113,7 +113,7 @@ that might move."
                 (when (and (eql (thing-t-oldch item) #\Space)
                            (not darkp))
                   (setf (thing-t-oldch item) (rogue-mvwinch 
-                                              cl-ncurses:*stdscr* 
+                                              cl-charms/low-level:*stdscr* 
                                               dy dx)))))
             (rogue-mvwaddch
              cw dy dx
@@ -147,7 +147,7 @@ un-initiated."
              (thing-t-disguise tp)
              (when (off *player* CANSEE)
                ;; Hide invisible monsters
-               (rogue-mvwinch cl-ncurses:*stdscr* y x)))))
+               (rogue-mvwinch cl-charms/low-level:*stdscr* y x)))))
       (otherwise ch))))
 
 (defun be-trapped (tc)
@@ -236,12 +236,12 @@ un-initiated."
     (for (y (1- (coord-y (thing-t-pos who))) 
             ey)
       (when (and (>= y 0)
-                 (<  y cl-ncurses:*lines*))
+                 (<  y cl-charms/low-level:*lines*))
         (for (x (1- (coord-x (thing-t-pos who))) 
                 ex)
           (block continue
             (unless (or (minusp x)
-                        (>= x cl-ncurses:*cols*))
+                        (>= x cl-charms/low-level:*cols*))
               (let ((ch (winat y x)))
                 (when (step-ok ch)
                   (let ((dest (make-coord :y y :x x)))

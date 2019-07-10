@@ -7,9 +7,9 @@
 
 (defun new-level ()
   (setf max-level (max level max-level))
-  (cl-ncurses:wclear cw)
-  (cl-ncurses:wclear mw)
-  (cl-ncurses:clear)
+  (cl-charms/low-level:wclear cw)
+  (cl-charms/low-level:wclear mw)
+  (cl-charms/low-level:clear)
   (status)
 
   ;; Free up the monsters on the last level
@@ -49,7 +49,7 @@
        (when (eql (winat hero.y hero.x) THE-FLOOR)
          (return)))
     (light hero)
-    (cl-ncurses:wmove cw hero.y hero.x)
+    (cl-charms/low-level:wmove cw hero.y hero.x)
     (rogue-waddch cw PLAYER)))
 
 (defun rnd-room ()

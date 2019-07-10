@@ -35,28 +35,28 @@
 
 (defun death (monst)
   "Do something really fun when he dies."
-  (cl-ncurses:clear)
+  (cl-charms/low-level:clear)
   (move 8 0)
   (dolist (dp *rip*)
-    (cl-ncurses:printw (format nil "~a~%" dp)))
-  (cl-ncurses:mvaddstr 14 
+    (cl-charms/low-level:printw (format nil "~a~%" dp)))
+  (cl-charms/low-level:mvaddstr 14 
                         (calc-x-position whoami)
                         whoami)
   (decf purse (truncate (/ purse 10)))
   (let ((buf (format nil "~d Au" purse)))
-    (cl-ncurses:mvaddstr 15
+    (cl-charms/low-level:mvaddstr 15
                           (calc-x-position buf)
                           buf)
     (let ((killer (killname monst)))
-      (cl-ncurses:mvaddstr 17
+      (cl-charms/low-level:mvaddstr 17
                             (calc-x-position killer)
                             killer)
-      (cl-ncurses:mvaddstr 16 33 (vowelstr killer))
-      (cl-ncurses:mvaddstr 
+      (cl-charms/low-level:mvaddstr 16 33 (vowelstr killer))
+      (cl-charms/low-level:mvaddstr 
        18 26
        (format nil "~4d" (nth-value 5 (decode-universal-time (get-universal-time))))) ; year
-      (cl-ncurses:move (1- cl-ncurses:*lines*) 0)
-      (draw cl-ncurses:*stdscr*)
+      (cl-charms/low-level:move (1- cl-charms/low-level:*lines*) 0)
+      (draw cl-charms/low-level:*stdscr*)
       (score purse 0 monst)
       (rogue-done))))
 

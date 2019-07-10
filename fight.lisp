@@ -434,7 +434,7 @@
                (incf (moor-r-goldval rp) (goldcalc))
                (when (save VS-MAGIC)
                  (incf (moor-r-goldval rp) (+ (goldcalc) (goldcalc) (goldcalc) (goldcalc))))
-               (rogue-mvwaddch cl-ncurses:*stdscr* (coord-y (moor-r-gold rp)) (coord-x (moor-r-gold rp)) GOLD)
+               (rogue-mvwaddch cl-charms/low-level:*stdscr* (coord-y (moor-r-gold rp)) (coord-x (moor-r-gold rp)) GOLD)
                (unless (logtest (moor-r-flags rp) ISDARK)
                  (light hero)
                  (rogue-mvwaddch cw hero.y hero.x PLAYER)))))))

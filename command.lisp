@@ -25,7 +25,7 @@
         (setf door-stop nil))
       (status)
       (setf lastscore purse)
-      (cl-ncurses:wmove cw hero.y hero.x)
+      (cl-charms/low-level:wmove cw hero.y hero.x)
       (unless (and (or running 
                        (plusp *count*)) 
                    jump)
@@ -142,15 +142,15 @@
               (#\v (msg "Rogue version ~a. (mctesq was here)" release))
               (#.(ctrl #\L)
                  (setf *after* nil)
-                 (cl-ncurses:clearok cl-ncurses:*curscr* cl-ncurses:true)
-                 (draw cl-ncurses:*curscr*))
+                 (cl-charms/low-level:clearok cl-charms/low-level:*curscr* cl-charms/low-level:true)
+                 (draw cl-charms/low-level:*curscr*))
               (#.(ctrl #\R)
                  (setf *after* nil)
                  (msg huh))
               (#\S (setf *after* nil)
                    (when (save-game)
-                     (cl-ncurses:wmove cw (1- cl-ncurses:*lines*) 0))
-                   (cl-ncurses:wclrtoeol cw)
+                     (cl-charms/low-level:wmove cw (1- cl-charms/low-level:*lines*) 0))
+                   (cl-charms/low-level:wclrtoeol cw)
                    (draw cw)
                    (rogue-done))        ; throws
               (#\Space)                 ; Rest command 
@@ -181,7 +181,7 @@
                      (#.(ctrl #\W) (whatis))
                      (#.(ctrl #\D) (incf level) (new-level))
                      (#.(ctrl #\U) (decf level) (new-level))
-                     (#.(ctrl #\F) (show-win cl-ncurses:*stdscr* "--More (level map)--"))
+                     (#.(ctrl #\F) (show-win cl-charms/low-level:*stdscr* "--More (level map)--"))
                      (#.(ctrl #\X) (show-win mw "--More (monsters)--"))
                      (#.(ctrl #\T) (teleport))
                      (#.(ctrl #\E) (msg "food left: ~d" food-left))
@@ -248,15 +248,15 @@
   (draw cw)
   (cond
     ((eql (readchar) #\y)
-     (cl-ncurses:clear)
-     (cl-ncurses:move (1- cl-ncurses:*lines*) 0)
-     (draw cl-ncurses:*stdscr*)
+     (cl-charms/low-level:clear)
+     (cl-charms/low-level:move (1- cl-charms/low-level:*lines*) 0)
+     (draw cl-charms/low-level:*stdscr*)
      (score purse 1)
      (abort))
     (t 
      ;;(signal(SIGINT, quit);
-     (cl-ncurses:wmove cw 0 0)
-     (cl-ncurses:wclrtoeol cw)
+     (cl-charms/low-level:wmove cw 0 0)
+     (cl-charms/low-level:wclrtoeol cw)
      (status)
      (draw cw)
      (zero! mpos
@@ -293,7 +293,7 @@
     ;; If it's not a *, print the right help string
     ;; or an error if he typed a funny character.
     (unless (eql helpch #\*)
-      (cl-ncurses:wmove cw 0 0)
+      (cl-charms/low-level:wmove cw 0 0)
       (let ((help-description (cdr (assoc helpch helpstr))))
         (if help-description
             (msg "~a~a" helpch help-description)
@@ -301,26 +301,26 @@
         (return-from help)))
     ;; Here we print help for everything.
     ;; Then wait before we return to command mode
-    (cl-ncurses:wclear hw)
+    (cl-charms/low-level:wclear hw)
     (let ((cnt 0))
       (map nil 
            #'(lambda (help-pair)
                (let ((key (car help-pair))
                      (help-description (cdr help-pair)))
-                 (cl-ncurses:mvwaddstr hw (mod cnt 23) (if (> cnt 22) 40 0) (unctrl-char key))
-                 (cl-ncurses:waddstr hw help-description)
+                 (cl-charms/low-level:mvwaddstr hw (mod cnt 23) (if (> cnt 22) 40 0) (unctrl-char key))
+                 (cl-charms/low-level:waddstr hw help-description)
                  (incf cnt)))
            helpstr))
-    (cl-ncurses:wmove hw (1- cl-ncurses:*lines*) 0)
-    (cl-ncurses:wprintw hw "--Press space to continue--")
+    (cl-charms/low-level:wmove hw (1- cl-charms/low-level:*lines*) 0)
+    (cl-charms/low-level:wprintw hw "--Press space to continue--")
     (draw hw)
     (wait-for #\Space)
-    (cl-ncurses:wclear hw)
+    (cl-charms/low-level:wclear hw)
     (draw hw)
-    (cl-ncurses:wmove cw 0 0)
-    (cl-ncurses:wclrtoeol cw)
+    (cl-charms/low-level:wmove cw 0 0)
+    (cl-charms/low-level:wclrtoeol cw)
     (status)
-    (cl-ncurses:touchwin cw)))
+    (cl-charms/low-level:touchwin cw)))
 
 (defun identify ()
   "Tell the player what a certain thing is."
@@ -420,7 +420,7 @@
 ;;        signal(SIGQUIT, endit);
 ;;        printf("\n[Press return to continue]");
 ;;        noecho();
-;;        (cl-ncurses:cbreak);
+;;        (cl-charms/low-level:cbreak);
 ;;        in-shell = FALSE;
 ;;        wait-for('\n');
 ;;        clearok(cw, TRUE);

@@ -8,8 +8,8 @@
   ;; TODO: I'm limiting to 80x24 here because I'm not sure
   ;; if this code works at bigger sizes.
   (let*
-      ((max-cols (min 80 cl-ncurses:*cols*))
-       (max-lines (min 24 cl-ncurses:*lines*))
+      ((max-cols (min 80 cl-charms/low-level:*cols*))
+       (max-lines (min 24 cl-charms/low-level:*lines*))
        (bsze (make-coord :x (truncate (/ max-cols
                                          3))
                          :y (truncate (/  max-lines
@@ -90,7 +90,7 @@
                   (mp (make-coord)))
               (loop
                  (rnd-pos rp mp)
-                 (when (eq (rogue-mvwinch cl-ncurses:*stdscr*
+                 (when (eq (rogue-mvwinch cl-charms/low-level:*stdscr*
                                           (coord-y mp)
                                           (coord-x mp))
                            THE-FLOOR)
@@ -121,19 +121,19 @@
         (px (rpx rp))
         (my (rmy rp))
         (mx (rmx rp)))
-    (cl-ncurses:move py 
+    (cl-charms/low-level:move py 
                      (1+ px))
     (vert (- my 2))                     ; Draw left side
-    (cl-ncurses:move (1- (+ py my)) 
+    (cl-charms/low-level:move (1- (+ py my)) 
                      px)
     (horiz mx)                          ; Draw bottom
-    (cl-ncurses:move py px)
+    (cl-charms/low-level:move py px)
     (horiz mx)                          ; Draw top
     (vert (- my 2))                     ; Draw right side
     ;; Put the floor down
     (do ((j 1 (1+ j)))
         ((>= j (1- my)))
-      (cl-ncurses:move (+ py j) (1+ px))
+      (cl-charms/low-level:move (+ py j) (1+ px))
       (do ((k 1 (1+ k)))
           ((>= k (1- mx)))
         (rogue-addch THE-FLOOR)))
@@ -151,10 +151,10 @@
 (defun vert (cnt)
   "Draw a vertical line."
   (let (x y)
-    (cl-ncurses:getyx cl-ncurses:*stdscr* y x)
+    (cl-charms/low-level:getyx cl-charms/low-level:*stdscr* y x)
     (decf x)
     (dotimes (_ cnt)
-      (cl-ncurses:move (incf y) x)
+      (cl-charms/low-level:move (incf y) x)
       (rogue-addch #\|))))
 
 (defun rnd-pos (rp cp)

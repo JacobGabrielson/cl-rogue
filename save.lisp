@@ -100,17 +100,17 @@
   (setf cur-armor (find cur-armor pack :test 'equalp))
   (setf cur-weapon (find cur-weapon pack :test 'equalp))
 
-  (setf cw (cl-ncurses:newwin cl-ncurses:*lines* cl-ncurses:*cols* 0 0)
-        mw (cl-ncurses:newwin cl-ncurses:*lines* cl-ncurses:*cols* 0 0)
-        hw (cl-ncurses:newwin cl-ncurses:*lines* cl-ncurses:*cols* 0 0))
-  (cl-ncurses:nocbreak)
+  (setf cw (cl-charms/low-level:newwin cl-charms/low-level:*lines* cl-charms/low-level:*cols* 0 0)
+        mw (cl-charms/low-level:newwin cl-charms/low-level:*lines* cl-charms/low-level:*cols* 0 0)
+        hw (cl-charms/low-level:newwin cl-charms/low-level:*lines* cl-charms/low-level:*cols* 0 0))
+  (cl-charms/low-level:nocbreak)
   (zero! mpos)
-  ;;(cl-ncurses:mvwprintw cw 0 0 "%s: %s", file, ctime(&sbuf2.st-mtime));
+  ;;(cl-charms/low-level:mvwprintw cw 0 0 "%s: %s", file, ctime(&sbuf2.st-mtime));
 
   (setf file-name file)
   (setup)
-  (cl-ncurses:clearok cl-ncurses:*curscr* cl-ncurses:true)
-  (cl-ncurses:touchwin cw)
+  (cl-charms/low-level:clearok cl-charms/low-level:*curscr* cl-charms/low-level:true)
+  (cl-charms/low-level:touchwin cw)
   (status)
   (playit)
   ;; NOTREACHED

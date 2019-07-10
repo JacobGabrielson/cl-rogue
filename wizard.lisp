@@ -99,7 +99,7 @@
   "Bamf the hero someplace else."
   (let (rm)
     (let ((c (copy-structure hero)))
-      (rogue-mvwaddch cw hero.y hero.x (rogue-mvwinch cl-ncurses:*stdscr* hero.y hero.x))
+      (rogue-mvwaddch cw hero.y hero.x (rogue-mvwinch cl-charms/low-level:*stdscr* hero.y hero.x))
       (loop
          (setf rm (rnd-room))
          (rnd-pos (aref rooms rm) hero)

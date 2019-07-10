@@ -22,7 +22,7 @@
         (passcount 0)
         rp
         ey ex)
-    (cl-ncurses:getyx cw oldy oldx)
+    (cl-charms/low-level:getyx cw oldy oldx)
     (when (and oldrp 
                (logtest (moor-r-flags oldrp) ISDARK) 
                (off *player* ISBLIND))
@@ -38,11 +38,11 @@
           ex (1+ hero.x))
     (for (x (1- hero.x) ex)
       (when (and (>= x 0) 
-                 (< x cl-ncurses:*cols*))
+                 (< x cl-charms/low-level:*cols*))
         (for (y (1- hero.y) ey)
           (block continue
             (when (and (> y 0) 
-                       (< y (1- cl-ncurses:*lines*)))
+                       (< y (1- cl-charms/low-level:*lines*)))
               (when (upper-case-p (rogue-mvwinch mw y x))
                 (let ((tp (if wakeup
                               (wake-monster y x)
@@ -75,7 +75,7 @@
                   (when (or (not (= y hero.y)) 
                             (not (= x hero.x)))
                     (return-from continue)))
-              (cl-ncurses:wmove cw y x)
+              (cl-charms/low-level:wmove cw y x)
               (rogue-waddch cw ch)
               (when (and door-stop 
                          (not firstmove) 
@@ -112,7 +112,7 @@
     (when (and door-stop (not firstmove) (> passcount 1))
       (set running nil))
     (rogue-mvwaddch cw hero.y hero.x PLAYER)
-    (cl-ncurses:wmove cw oldy oldx)
+    (cl-charms/low-level:wmove cw oldy oldx)
     (setf oldpos hero
           oldrp rp)))
 
