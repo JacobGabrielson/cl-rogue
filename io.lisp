@@ -12,8 +12,8 @@
   (case (length (first args))
     (0
      ;; If the string is "", just clear the line
-     (cl-ncurses:wmove cw 0 0)
-     (cl-ncurses:wclrtoeol cw)
+     (cl-charms/low-level:wmove cw 0 0)
+     (cl-charms/low-level:wclrtoeol cw)
      (zero! mpos))
     (otherwise
      ;; Add to the message and flush it out
@@ -29,16 +29,16 @@
 is up there with the --More--)"
   (setf huh (copy-seq msgbuf))
   (unless (zerop mpos)
-    (cl-ncurses:wmove cw 0 mpos)
-    (cl-ncurses:waddstr cw "--More--")
+    (cl-charms/low-level:wmove cw 0 mpos)
+    (cl-charms/low-level:waddstr cw "--More--")
     (draw cw)
     (wait-for #\Space))
-  (cl-ncurses:mvwaddstr cw 0 0 msgbuf)
-  (cl-ncurses:wclrtoeol cw)
+  (cl-charms/low-level:mvwaddstr cw 0 0 msgbuf)
+  (cl-charms/low-level:wclrtoeol cw)
   (setf mpos newpos
         newpos 0
         msgbuf (copy-seq ""))
-  (cl-ncurses:wrefresh cw))
+  (cl-charms/low-level:wrefresh cw))
 
 (defun doadd (&rest args)
   (setf msgbuf (concatenate 'string msgbuf (apply #'format nil args))
@@ -57,9 +57,9 @@ CW.")
 (defun readchar ()
   "Flushes stdout so that screen is up to date and then returns
 getchar."
-  (let ((c (cl-ncurses:wgetch (or *input-window* cw))))
+  (let ((c (cl-charms/low-level:wgetch (or *input-window* cw))))
     (cond
-      ((eql c cl-ncurses:err) nil)
+      ((eql c cl-charms/low-level:err) nil)
       (t (code-char c)))))
 
 (let ((buf "")
@@ -88,7 +88,7 @@ was."
          (= s-lvl level)
          (= s-hungry hungry-state))
       (let (oy ox temp)
-        (cl-ncurses:getyx cw oy ox)
+        (cl-charms/low-level:getyx cw oy ox)
         (unless (= s-hp max-hp)
           (setf s-hp max-hp
                 temp s-hp
@@ -122,14 +122,18 @@ was."
               s-ac (if cur-armor 
                        (object-o-ac cur-armor)
                        (stats-s-arm pstats)))
-        (cl-ncurses:mvwaddstr cw (1- cl-ncurses:*lines*) 0 buf)
-        (cl-ncurses:waddstr cw (case hungry-state
-                                  (1 "  Hungry")
-                                  (2 "  Weak")
-                                  (3 "  Fainting")))
-        (cl-ncurses:wclrtoeol cw)
+
+        (cl-charms/low-level:mvwaddstr cw (1- cl-charms/low-level:*lines*) 0 buf)
+
+        (cl-charms/low-level:waddstr cw (case hungry-state
+					  (0 "")
+					  (1 "  Hungry")
+					  (2 "  Weak")
+					  (3 "  Fainting")))
+
+	(cl-charms/low-level:wclrtoeol cw)
         (setf s-hungry hungry-state)
-        (cl-ncurses:wmove cw oy ox)))))
+        (cl-charms/low-level:wmove cw oy ox)))))
 
 (defun wait-for (ch)
   "Sit around until the guy types the right key."
@@ -140,13 +144,13 @@ was."
 
 (defun show-win (scr message)
   "Display a window and wait before returning."
-  (cl-ncurses:mvwaddstr scr 0 0 message)
-  (cl-ncurses:touchwin scr)
-  (cl-ncurses:wmove scr hero.y hero.x)
+  (cl-charms/low-level:mvwaddstr scr 0 0 message)
+  (cl-charms/low-level:touchwin scr)
+  (cl-charms/low-level:wmove scr hero.y hero.x)
   (draw scr)
   (wait-for #\Space)
-  (cl-ncurses:clearok cw 1)
-  (cl-ncurses:touchwin cw))
+  (cl-charms/low-level:clearok cw 1)
+  (cl-charms/low-level:touchwin cw))
 
 (defun flush-type ()
-  (cl-ncurses:flushinp))
+  (cl-charms/low-level:flushinp))
