@@ -32,6 +32,11 @@ Presently CL-ROGUE also depends on the
 library which wraps ncurses. The older CL-NCURSES package no longer
 works reliably on all platforms.
 
+### SBCL
+
+Only SBCL v1.4.5 has been tested recently; other versions of Common
+Lisp might work but they haven't been tested.
+
 ## Running
 
 Once you've ensured you have the above dependencies, you should be
@@ -43,7 +48,15 @@ able to execute the following commands in a screen-oriented terminal:
 (cl-rogue:rogue)
 ```
 
-Note that you should substitute in something else for `"src/cl-rogue"`
+**Note**: you should substitute in something else for `"src/cl-rogue"`
 if that's not where you put it.
 
-Only SBCL v1.4.5 has been tested recently.
+**Note**: ignore warnings that look like this:
+
+```
+WARNING: Unable to load ncurses.
+```
+
+Despite the dire-sounding nature of the warning, curses seems to work
+just fine.
+
