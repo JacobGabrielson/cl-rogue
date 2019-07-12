@@ -214,12 +214,8 @@
   (apply #'msg args))
 
 
-;; should come from cl-charms/low-level...
-(defun move (y x)
-  (cl-charms/low-level:wmove cl-charms/low-level:*stdscr* y x))
-
 (defun cmov (xy)
-  (move (coord-y xy)
+  (cl-charms/low-level:move (coord-y xy)
         (coord-x xy)))
 
 (defun distance (y1 x1 y2 x2)

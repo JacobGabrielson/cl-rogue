@@ -36,7 +36,7 @@
 (defun death (monst)
   "Do something really fun when he dies."
   (cl-charms/low-level:clear)
-  (move 8 0)
+  (cl-charms/low-level:move 8 0)
   (dolist (dp *rip*)
     (cl-charms/low-level:printw (format nil "~a~%" dp)))
   (cl-charms/low-level:mvaddstr 14 
