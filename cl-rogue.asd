@@ -8,6 +8,7 @@
 (in-package :cl-rogue-asd)
 
 (defsystem "cl-rogue"
+           :description "cl-rogue: a line-for-line port of C rogue to Common Lisp" 
            :version "0.0.2"
            :maintainer "Jacob Gabrielson <jacobg23@pobox.com>"
            :license "MIT"
