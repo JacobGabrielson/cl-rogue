@@ -1,3 +1,5 @@
+# Based partly on https://github.com/davazp/docker-sbcl
+
 FROM ubuntu:18.04
 RUN apt-get update && apt-get install -y --no-install-recommends \
   build-essential \
@@ -13,13 +15,14 @@ RUN curl -O https://beta.quicklisp.org/quicklisp.lisp
 RUN echo '(load "quicklisp.lisp") \
   (quicklisp-quickstart:install)  \
   (ql::without-prompting          \
-    (ql:add-to-init-file))' > install-quicklisp.lisp
+    (ql:add-to-init-file))        \
+  (ql:quickload "cl-charms")      \
+    ' > install-quicklisp.lisp
 RUN sbcl --load install-quicklisp.lisp
 
 # Using ~/common-lisp means ASDF will automatically find it
 RUN mkdir -p /root/common-lisp/cl-rogue
 WORKDIR /root/common-lisp/cl-rogue
-COPY *.lisp *.asd ./
-COPY /etc/*.lisp ./
+COPY /etc/*.lisp *.lisp *.asd ./
 RUN sbcl --load load-rogue.lisp
 ENTRYPOINT sbcl --load run-rogue.lisp
