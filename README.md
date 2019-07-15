@@ -39,6 +39,8 @@ Lisp might work but they haven't been tested.
 
 ## Running
 
+### Locally
+
 Once you've ensured you have the above dependencies, you should be
 able to execute the following commands in a screen-oriented terminal:
 
@@ -60,3 +62,13 @@ WARNING: Unable to load ncurses.
 Despite the dire-sounding nature of the warning, curses seems to work
 just fine.
 
+### Using Docker
+
+Using the `Dockerfile` in the `cl-rogue` directory, you should be able
+to do the following:
+
+```
+cd cl-rogue
+docker build -t cl-rogue .
+docker run -i -t cl-rogue
+```
