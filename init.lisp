@@ -506,3 +506,10 @@
     (#\! . "	shell escape")
     (#\S . "	save game")
     (#\Q . "	quit")))
+
+;;; Curses windows
+(defparameter cw nil)                   ; Window that the player sees 
+(defparameter hw nil)                   ; Used for the help command 
+(defparameter mw nil)                   ; Used to store mosnters 
+
+

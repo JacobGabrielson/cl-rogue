@@ -9,9 +9,6 @@
 (in-package :cl-rogue)
 
 (define-resettable num-checks 0)     ; times we've gone over in checkout() 
-(defparameter cw nil)                   ; Window that the player sees 
-(defparameter hw nil)                   ; Used for the help command 
-(defparameter mw nil)                   ; Used to store mosnters 
 
 (defun rogue-done ()
   (throw 'rogue-done nil))
