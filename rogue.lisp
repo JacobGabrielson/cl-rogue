@@ -429,7 +429,7 @@ cards."
 
 (defun unctrl-char (c)
   ;; XXX: this doesn't actually handle control chars as it should??
-  ;; (I couldn't get cl-charms/low-level' unctrl to work).
+  ;; (I couldn't get cl-ncurses unctrl to work).
   (format nil "~:c" c))
 
 (defun >1 (number)

@@ -11,7 +11,7 @@ cat > $rogue <<EOF
 (swank:create-server :port $PORT)
 (pushnew (merge-pathnames "$parent_dir" (user-homedir-pathname)) asdf:*central-registry*)
 (format t "~&Added $parent_dir to asdf:*central-registry*")
-(asdf:operate 'asdf:load-op 'cl-rogue)
+(asdf:load-system :cl-rogue)
 (format t "~&To debug, use M-x slime-connect to port $PORT, in Emacs
 Hit RETURN to continue")
 (read-line)
