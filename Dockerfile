@@ -16,8 +16,9 @@ RUN echo '(load "quicklisp.lisp") \
     (ql:add-to-init-file))' > install-quicklisp.lisp
 RUN sbcl --load install-quicklisp.lisp
 
-RUN mkdir /cl-rogue
-WORKDIR /cl-rogue
+# Using ~/common-lisp means ASDF will automatically find it
+RUN mkdir -p /root/common-lisp/cl-rogue
+WORKDIR /root/common-lisp/cl-rogue
 COPY *.lisp *.asd ./
 COPY /etc/*.lisp ./
 RUN sbcl --load load-rogue.lisp
