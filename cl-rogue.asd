@@ -11,7 +11,7 @@
            :version "0.0.2"
            :maintainer "Jacob Gabrielson <jacobg23@pobox.com>"
            :license "MIT"
-           :depends-on (:cl-ncurses :sb-posix)
+           :depends-on (:cl-charms :sb-posix)
            :components (
                         (:file "armor" :depends-on ("init"))
                         (:file "chase" :depends-on ("init"))
