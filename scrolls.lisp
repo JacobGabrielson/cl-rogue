@@ -10,8 +10,8 @@
           (progn
             (msg (if terse
                      "Nothing to read"
-                     "There is nothing on it to read")
-                 (return-from read-scroll))))
+                     "There is nothing on it to read"))
+	    (return-from read-scroll)))
       (msg "As you read the scroll, it vanishes.")
       ;; Calculate the effect it has on the poor guy.
       (when (eql obj cur-weapon)
@@ -122,9 +122,9 @@
              (incf gtotal (moor-r-goldval (aref rooms i)))
              (when (and (not (zerop (moor-r-goldval (aref rooms i))))
                         (eql (rogue-mvwinch cl-charms/low-level:*stdscr*
-                                           (coord-y (moor-r-gold (aref rooms i)))
-                                           (coord-x (moor-r-gold (aref rooms i))))
-                            GOLD))
+					    (coord-y (moor-r-gold (aref rooms i)))
+					    (coord-x (moor-r-gold (aref rooms i))))
+			     GOLD))
                (rogue-mvwaddch hw
                                (coord-y (moor-r-gold (aref rooms i)))
                                (coord-x (moor-r-gold (aref rooms i)))
