@@ -1,6 +1,6 @@
 # CL-ROGUE
 
-This is a nearly line-for-line port of Rogue v3.6.2[^roguecode]  from C to Common
+This is a nearly line-for-line port of Rogue v3.6.2 from C to Common
 Lisp. The goal of this exercise was to see how easy it would be to
 write idiomatic 1980s-era C, well-written but with lots of
 side-effects and stuff, in Common Lisp. In the process of porting the
@@ -9,9 +9,9 @@ code base. It also showed me that it was possible to keep the code
 almost exactly the same across both languages (same variable names,
 same control flow), with only a few exceptions.
 
-
-[^roguecode]: The source code is most likely [here](http://www.roguelikedevelopment.org/archive/files/sourcecode/from_bsd_usenix87_rogue3.6.zip); see also [version 5.4.4](https://github.com/Davidslv/rogue))
-
+The source code is most likely
+[here](http://www.roguelikedevelopment.org/archive/files/sourcecode/from_bsd_usenix87_rogue3.6.zip);
+see also [version 5.4.4](https://github.com/Davidslv/rogue).
 
 ## Dependencies
 
