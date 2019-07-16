@@ -4,16 +4,16 @@
 
 (asdf:defsystem #:cl-rogue
            :description "cl-rogue: a line-for-line port of C rogue to Common Lisp" 
-           :version "0.0.2"
+           :version "3.6.2"
            :maintainer "Jacob Gabrielson <jacobg23@pobox.com>"
            :license "MIT"
            :depends-on (:cl-charms :sb-posix)
 	   :serial t
            :components (
                         (:file "package")
-			(:file "vers" :depends-on ("package"))
+			(:file "vers")
                         (:file "rogue")
-                        (:file "init" :depends-on ("rogue"))
+                        (:file "init")
                         (:file "io")
 			(:file "save")
                         (:file "armor")
