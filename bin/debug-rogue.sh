@@ -4,7 +4,6 @@ set -eux
 set -o pipefail
 
 PORT=4099
-echo "To debug use M-x slime-connect to port $PORT, in Emacs"
 
 parent_dir=$(dirname $(readlink -f $(dirname "$0")))"/"
 rogue=$(mktemp -t rogueXXXXXXX.lisp)
