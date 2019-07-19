@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+
+set -eux
+set -o pipefail
 
 PORT=4099
 echo "To debug use M-x slime-connect to port $PORT, in Emacs"
