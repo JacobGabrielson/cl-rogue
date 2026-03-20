@@ -327,9 +327,6 @@
             (write-char new-ch)
             (setf (aref pbuf r c) new-ch)
             (incf *physical-cursor-x*))))))
-  ;; Keep *stdscr* in sync with what is now on screen.
-  (unless (eq win *stdscr*)
-    (overwrite win *stdscr*))
   ;; Park the physical cursor at the window's logical cursor position.
   (let ((cy (win-cursor-y win))
         (cx (win-cursor-x win)))
