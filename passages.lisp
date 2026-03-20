@@ -11,15 +11,15 @@
 (defun do-passages ()
   "Draw all the passages on a level."
   (let ((rdes-array
-         (vector (make-rdes :conn #*010100000 :isconn #*000000000 :ingraph nil)
-                 (make-rdes :conn #*101010000 :isconn #*000000000 :ingraph nil)
-                 (make-rdes :conn #*010001000 :isconn #*000000000 :ingraph nil)
-                 (make-rdes :conn #*100010100 :isconn #*000000000 :ingraph nil)
-                 (make-rdes :conn #*010101010 :isconn #*000000000 :ingraph nil)
-                 (make-rdes :conn #*001010001 :isconn #*000000000 :ingraph nil)
-                 (make-rdes :conn #*000100010 :isconn #*000000000 :ingraph nil)
-                 (make-rdes :conn #*000010101 :isconn #*000000000 :ingraph nil)
-                 (make-rdes :conn #*000001010 :isconn #*000000000 :ingraph nil))))
+         (vector (make-rdes :conn #*010100000 :isconn (make-array 9 :element-type 'bit) :ingraph nil)
+                 (make-rdes :conn #*101010000 :isconn (make-array 9 :element-type 'bit) :ingraph nil)
+                 (make-rdes :conn #*010001000 :isconn (make-array 9 :element-type 'bit) :ingraph nil)
+                 (make-rdes :conn #*100010100 :isconn (make-array 9 :element-type 'bit) :ingraph nil)
+                 (make-rdes :conn #*010101010 :isconn (make-array 9 :element-type 'bit) :ingraph nil)
+                 (make-rdes :conn #*001010001 :isconn (make-array 9 :element-type 'bit) :ingraph nil)
+                 (make-rdes :conn #*000100010 :isconn (make-array 9 :element-type 'bit) :ingraph nil)
+                 (make-rdes :conn #*000010101 :isconn (make-array 9 :element-type 'bit) :ingraph nil)
+                 (make-rdes :conn #*000001010 :isconn (make-array 9 :element-type 'bit) :ingraph nil))))
     ;; Starting with one room, connect it to a random adjacent room
     ;; and then pick a new room to start with.
     (let* ((roomcount 1)
