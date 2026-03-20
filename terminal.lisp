@@ -275,8 +275,11 @@
 ;;; ===== Reading from window buffer =====
 
 (defun winch  (win)      (char-code (aref (win-buffer win) (win-cursor-y win) (win-cursor-x win))))
-(defun mvinch (y x)      (char-code (aref (win-buffer *stdscr*) y x)))
-(defun mvwinch (win y x) (char-code (aref (win-buffer win) y x)))
+;;; ncurses mvwinch/mvinch move the cursor before reading, as a side-effect.
+;;; winat (rogue.lisp) calls mvwinch then winch on the same window, relying on
+;;; the cursor having been left at (y,x) so winch reads the same cell.
+(defun mvinch  (y x)     (move y x)      (char-code (aref (win-buffer *stdscr*) y x)))
+(defun mvwinch (win y x) (wmove win y x) (char-code (aref (win-buffer win) y x)))
 
 ;;; ===== Window copy operations =====
 
