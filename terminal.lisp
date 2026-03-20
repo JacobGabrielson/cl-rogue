@@ -110,8 +110,11 @@
   Silently does nothing if stdin is not a real tty (e.g. during testing)."
   (handler-case
       (progn
-        ;; Save a fresh copy for later restoration.
-        (setf *saved-termios* (sb-posix:tcgetattr 0))
+        ;; Save a fresh copy for later restoration — only on the first call,
+        ;; so that repeated cbreak/enter-raw-mode calls (e.g. from setup)
+        ;; don't overwrite the pre-game termios with already-raw settings.
+        (unless *saved-termios*
+          (setf *saved-termios* (sb-posix:tcgetattr 0)))
         (let ((termios (sb-posix:tcgetattr 0)))
           ;; Disable canonical mode and echo.
           (setf (sb-posix:termios-lflag termios)
