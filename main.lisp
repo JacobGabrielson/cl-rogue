@@ -60,7 +60,9 @@
     (init-stones)                    ; set up stone settings of rings 
     (init-materials)                    ; set up materials of wands 
 
-    (charms:with-curses ()
+    (unwind-protect
+        (progn
+          (cl-charms/low-level:initscr)
 
 	     (when (< cl-charms/low-level:*cols*  70)
 	       (format t "~%~%Sorry, ~a, but your terminal window has too few columns.~%" whoami)
@@ -126,7 +128,8 @@
 	       (setf obj (make-object :o-type FOOD :o-count 1 :o-which 0))
 	       (add-pack obj t)
 
-	       (playit)))))
+	       (playit)))
+      (ignore-errors (cl-charms/low-level:endwin)))))
 
 
 (defun endit ()
