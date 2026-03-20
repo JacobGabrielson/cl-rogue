@@ -62,20 +62,14 @@
 
     (charms:with-curses ()
 
-      (unwind-protect
-	   (progn
-	     (cl-charms/low-level:initscr)         ; start up cursor package 
-	     
 	     (when (< cl-charms/low-level:*cols*  70)
 	       (format t "~%~%Sorry, ~a, but your terminal window has too few columns.~%" whoami)
 	       (format t "Your terminal has ~a columns, needs 70.~%" cl-charms/low-level:*cols*)
-	       (cl-charms/low-level:endwin)
 	       (return-from rogue))
 
 	     (when (< cl-charms/low-level:*lines* 22)
 	       (format t "~%~%Sorry, ~a, but your terminal window has too few lines.~%" whoami)
 	       (format t "Your terminal has ~d lines, needs 22.~%" cl-charms/low-level:*lines*)
-	       (cl-charms/low-level:endwin)
 	       (return-from rogue))
 
 	     (setup)
@@ -86,7 +80,7 @@
 		   hw (cl-charms/low-level:newwin cl-charms/low-level:*lines* cl-charms/low-level:*cols* 0 0)
 		   waswizard wizard)
 
-	     (new-level)                  ; Draw current level 
+	     (new-level)                  ; Draw current level
 
 	     ;; Start up daemons and fuses
 	     (daemon 'doctor 0 AFTER)
@@ -121,7 +115,7 @@
 	       (add-pack obj t)
 
 	       ;; And his suit of armor
-	       (setf obj (make-object :o-type  ARMOR 
+	       (setf obj (make-object :o-type  ARMOR
 				      :o-which RING-MAIL
 				      :o-ac    (1- (aref a-class RING-MAIL))
 				      :o-flags ISKNOW)
@@ -132,10 +126,7 @@
 	       (setf obj (make-object :o-type FOOD :o-count 1 :o-which 0))
 	       (add-pack obj t)
 
-	       (playit)))
-
-	;; cleanup
-	(cl-charms/low-level:endwin)))))
+	       (playit)))))
 
 
 (defun endit ()
