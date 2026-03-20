@@ -243,13 +243,20 @@
 ;;; ===== Character and string output =====
 
 (defun win-put-char (win code)
-  "Write CODE (integer char code) at WIN's cursor, then advance cursor."
+  "Write CODE (integer char code) at WIN's cursor, then advance cursor.
+  Tab characters are expanded to the next 8-column stop, matching ncurses."
   (let ((y (win-cursor-y win))
         (x (win-cursor-x win)))
     (when (and (< -1 y (win-rows win))
                (< -1 x (win-cols win)))
-      (setf (aref (win-buffer win) y x) (code-char code))
-      (incf (win-cursor-x win)))))
+      (if (= code 9)                    ; tab → expand to next 8-col stop
+          (let ((next-stop (min (win-cols win) (* 8 (ceiling (1+ x) 8)))))
+            (loop while (< (win-cursor-x win) next-stop)
+                  do (setf (aref (win-buffer win) y (win-cursor-x win)) #\Space)
+                     (incf (win-cursor-x win))))
+          (progn
+            (setf (aref (win-buffer win) y x) (code-char code))
+            (incf (win-cursor-x win)))))))
 
 (defun addch   (code)        (win-put-char *stdscr* code))
 (defun waddch  (win code)    (win-put-char win code))
