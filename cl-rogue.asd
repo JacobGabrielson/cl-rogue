@@ -8,11 +8,12 @@
   :author "Jacob Gabrielson <jacobg23@pobox.com>"
   :maintainer "Jacob Gabrielson <jacobg23@pobox.com>"
   :license "MIT"
-  :depends-on (:cl-charms)
+  :depends-on ()
   :serial t
   :source-control (:git "https://github.com/JacobGabrielson/cl-rogue.git")
   :entry-point "cl-rogue:rogue"
-  :components ((:file "package")
+  :components ((:file "terminal")
+               (:file "package")
 	       (:file "vers")
 	       (:file "rogue")
 	       (:file "init")
