@@ -1,6 +1,6 @@
 # Project Memory
 
-> **This file is read-only.** Do not auto-update it via the memory system. Edit manually and commit when needed.
+> **This file is append-only.** Add new entries as needed, but do not modify or delete existing content. Commit changes when updated.
 
 ## Project
 
