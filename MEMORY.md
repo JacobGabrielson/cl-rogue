@@ -29,7 +29,7 @@ The resulting binary is `./cl-rogue` (gitignored). Run it in a real terminal (no
 ## Git
 
 - Author: Jacob Gabrielson <jacobg23@pobox.com> (set globally)
-- Active branch: `bugfix/double-endwin-on-exit`
+- Active branch: `remove-curses`
 - No "Co-Authored-By: Claude" lines in commits
 - Commit style: explain *why* (intent/motivation); explain *how* only when not obvious from the diff
 
@@ -44,6 +44,32 @@ Fix: removed the inner `unwind-protect` and replaced `with-curses` with a manual
 `save-lisp-and-die` moves literal constants (including `#*` bit-vector literals embedded in compiled code) to read-only memory. The `isconn` fields of `rdes` structs were initialized with `#*000000000` literals and then mutated via `(setf (aref ...))`, causing a `MEMORY-FAULT-ERROR` on every call to `new-level` — silent exit with no message.
 
 Fix: replaced `#*000000000` literals with `(make-array 9 :element-type 'bit)` to allocate fresh writable bit-vectors at runtime.
+
+## Bugs Fixed (on `remove-curses` branch — `terminal.lisp` + one game file)
+
+### 3. `@` trail when moving (`terminal.lisp`)
+`wrefresh` was calling `(overwrite win *stdscr*)`, copying `cw` (which has `@`) into `*stdscr*` (terrain buffer). `winat` reads terrain from `*stdscr*`, so it would return `@` at the old hero position, leaving a trail.
+Fix: removed the `overwrite` call. `*physical-buffer*` handles incremental rendering independently; `*stdscr*` stays as pure terrain.
+
+### 4. Echo not restored on exit (`terminal.lisp`)
+`setup()` calls `cbreak()` → `enter-raw-mode()` a second time after `initscr` already called it. The second call overwrote `*saved-termios*` with already-raw settings (echo off), so `leave-raw-mode` restored the wrong state.
+Fix: only save termios on the first call (`unless *saved-termios*`).
+
+### 5. Garbled help screen — tab expansion (`terminal.lisp`)
+Help strings use `\t` to align columns. `win-put-char` stored the raw tab byte as a single cell. ncurses expands tabs to the next 8-column stop.
+Fix: detect code 9 in `win-put-char` and fill with spaces to next 8-column boundary.
+
+### 6. Blank-space blockers / invisible monsters (`terminal.lisp`)
+`mvwinch`/`mvinch` in ncurses move the window cursor to (y,x) before returning the character — `winat` relies on this so that the subsequent `winch(mw)` reads from the same cell. Our implementation read from (y,x) but never moved the cursor, so `winch(mw)` read from a stale position (one cell past the last `mvwaddch`), returning space. This blocked movement and hid monsters. Also broke stair/trap placement which expected `*stdscr*`'s cursor to be at the found position after `winat`.
+Fix: `mvwinch` calls `wmove` before reading; `mvinch` calls `move`.
+
+### 7. Monster ghost-through-player (`chase.lisp`)
+In C rogue `tp->t_dest = &hero` is a live pointer. In CL, `do-move` uses `(setf hero (copy-structure nh))` which creates a new coord object, leaving `thing-t-dest` pointing to the old position. Monster chased old pos, stepped onto player's cell without fighting, then appeared behind the player.
+Fix: in `do-chase`, added `(when (equalp ch-ret hero) (return-from do-chase (attack th)))` before moving the monster.
+
+### 8. Inventory items all on one row (`terminal.lisp`)
+`waddch(win, '\n')` in ncurses advances to the next row and resets x to 0. `win-put-char` was treating newline as an ordinary character, storing it in the buffer and advancing x.
+Fix: detect code 10 in `win-put-char`, increment `cursor-y`, reset `cursor-x` to 0, write nothing to buffer.
 
 ## Key Files
 
