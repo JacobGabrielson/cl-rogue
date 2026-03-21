@@ -14,6 +14,10 @@
   (throw 'rogue-done nil))
 
 (defun rogue (&key (wizard-mode nil) (print-score nil) (restore-from nil))
+  ;; Re-seed the RNG from the OS on every run.  save-lisp-and-die
+  ;; snapshots *random-state* into the binary, so without this every
+  ;; run would produce the same dungeon.
+  (setf *random-state* (make-random-state t))
   ;; Check for print-score option
   (catch 'rogue-done
     (when print-score
