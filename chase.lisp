@@ -53,6 +53,14 @@
               (setf stoprun t)))
         (when (eql (thing-t-type th) #\F)
           (return-from do-chase 0)))
+    ;; In C rogue, t_dest = &hero is a live pointer so chase() sees
+    ;; distance 0 when the monster is adjacent to the (updated) hero and
+    ;; attacks via the equalp check above.  In CL, do-move replaces the
+    ;; hero coord with copy-structure, making t_dest stale.  The monster
+    ;; then chases the old position, gets distance 1, and steps onto the
+    ;; hero's current cell without fighting.  Catch that here.
+    (when (equalp ch-ret hero)
+      (return-from do-chase (attack th)))
     (rogue-mvwaddch cw
                     (coord-y (thing-t-pos th))
                     (coord-x (thing-t-pos th))
