@@ -244,19 +244,25 @@
 
 (defun win-put-char (win code)
   "Write CODE (integer char code) at WIN's cursor, then advance cursor.
-  Tab characters are expanded to the next 8-column stop, matching ncurses."
+  Tab (9) expands to the next 8-column stop.
+  Newline (10) advances to the next row and resets x to 0 — matching
+  ncurses, which does not store newlines in the window buffer."
   (let ((y (win-cursor-y win))
         (x (win-cursor-x win)))
-    (when (and (< -1 y (win-rows win))
-               (< -1 x (win-cols win)))
-      (if (= code 9)                    ; tab → expand to next 8-col stop
-          (let ((next-stop (min (win-cols win) (* 8 (ceiling (1+ x) 8)))))
-            (loop while (< (win-cursor-x win) next-stop)
-                  do (setf (aref (win-buffer win) y (win-cursor-x win)) #\Space)
-                     (incf (win-cursor-x win))))
-          (progn
-            (setf (aref (win-buffer win) y x) (code-char code))
-            (incf (win-cursor-x win)))))))
+    (cond
+      ((= code 10)                      ; newline → next row, column 0
+       (incf (win-cursor-y win))
+       (setf (win-cursor-x win) 0))
+      ((not (and (< -1 y (win-rows win))
+                 (< -1 x (win-cols win)))))   ; out-of-bounds → ignore
+      ((= code 9)                       ; tab → expand to next 8-col stop
+       (let ((next-stop (min (win-cols win) (* 8 (ceiling (1+ x) 8)))))
+         (loop while (< (win-cursor-x win) next-stop)
+               do (setf (aref (win-buffer win) y (win-cursor-x win)) #\Space)
+                  (incf (win-cursor-x win)))))
+      (t
+       (setf (aref (win-buffer win) y x) (code-char code))
+       (incf (win-cursor-x win))))))
 
 (defun addch   (code)        (win-put-char *stdscr* code))
 (defun waddch  (win code)    (win-put-char win code))
