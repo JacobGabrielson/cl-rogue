@@ -2,3 +2,4 @@
 cl-rogue
 driver/venv/
 __pycache__/
+training_data/
