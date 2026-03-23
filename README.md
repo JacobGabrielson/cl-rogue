@@ -15,55 +15,38 @@ see also [version 5.4.4](https://github.com/Davidslv/rogue).
 
 ## Dependencies
 
-### Quicklisp 
-
-CL-ROGUE is a lot easier to get running with
-[Quicklisp](https://www.quicklisp.org/beta/); so it is highly
-recommended you set that up first.
-
-### Curses Library
-
-Make sure you've installed ncurses. For example on Ubuntu 18.04 you'd
-execute:
-
-```bash
-sudo apt-get install -y libncurses5-dev
-```
-
-Presently CL-ROGUE also depends on the
-[CL-CHARMS](https://github.com/HiTECNOLOGYs/cl-charms) Common Lisp
-library which wraps ncurses. The older CL-NCURSES package no longer
-works reliably on all platforms.
-
 ### SBCL
 
-Only SBCL v1.4.5 has been tested recently; other versions of Common
-Lisp might work but they haven't been tested.
+Only SBCL has been tested. No external Common Lisp libraries are
+required — terminal I/O is handled by a pure-CL VT100 implementation
+(`terminal.lisp`) that replaces the original ncurses dependency.
 
 ## Running
 
 ### Locally
 
-Once you've ensured you have the above dependencies, you should be
-able to execute the following commands in a screen-oriented terminal:
+Build the binary once with the provided script:
+
+```bash
+sbcl --load load.lisp
+```
+
+This produces a standalone `cl-rogue` binary. Then run it in any
+screen-oriented terminal:
+
+```bash
+./cl-rogue
+```
+
+Alternatively, load and run directly from SBCL without building:
 
 ```lisp
 (pushnew (merge-pathnames "src/cl-rogue/" (user-homedir-pathname)) asdf:*central-registry*)
-(asdf:operate 'asdf:load-op 'cl-rogue)
+(asdf:load-system :cl-rogue)
 (cl-rogue:rogue)
 ```
 
-**Note**: you should substitute in something else for `"src/cl-rogue"`
-if that's not where you put it.
-
-**Note**: ignore warnings that look like this:
-
-```
-WARNING: Unable to load ncurses.
-```
-
-Despite the dire-sounding nature of the warning, curses seems to work
-just fine.
+**Note**: substitute the actual path to the repository for `"src/cl-rogue/"`.
 
 ### Using Docker
 
@@ -74,4 +57,19 @@ to do the following:
 cd cl-rogue
 docker build -t cl-rogue .
 docker run -i -t cl-rogue
+```
+
+### Headless driver (Python)
+
+The `driver/` directory contains a Python headless driver that runs
+cl-rogue in a PTY (no real terminal required) and lets you send
+keystrokes and inspect the screen programmatically — useful for
+scripted play and bug-finding:
+
+```bash
+cd driver
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python example.py
 ```
