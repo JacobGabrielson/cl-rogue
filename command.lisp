@@ -252,7 +252,7 @@
      (cl-charms/low-level:move (1- cl-charms/low-level:*lines*) 0)
      (draw cl-charms/low-level:*stdscr*)
      (score purse 1)
-     (abort))
+     (rogue-done))
     (t 
      ;;(signal(SIGINT, quit);
      (cl-charms/low-level:wmove cw 0 0)
