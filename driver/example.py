@@ -9,13 +9,18 @@ Run from the driver/ directory with the venv active:
 Or directly:
     ./venv/bin/python example.py
 
-The cl-rogue binary must exist at ../cl-rogue (build it first with
-`make` or `sbcl --load build.lisp` from the repo root).
+The cl-rogue binary must exist at the repo root (build it first with
+`sbcl --load load.lisp` from the repo root). The script can be run from
+any directory.
 """
 
+import os
 import sys
 import time
 from rogue_driver import RogueDriver
+
+# Locate the binary relative to this script, regardless of cwd.
+_HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 # Arrow-key escape sequences (vi-style alternatives: h j k l)
@@ -63,10 +68,10 @@ def find_monsters(driver):
 
 
 def main():
-    binary = "../cl-rogue"
+    binary = os.path.join(_HERE, "..", "cl-rogue")
 
     print("Starting cl-rogue headless driver example...")
-    print(f"Binary: {binary}")
+    print(f"Binary: {os.path.abspath(binary)}")
     print()
 
     with RogueDriver(binary, rows=24, cols=80) as driver:

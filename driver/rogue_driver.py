@@ -102,6 +102,11 @@ class RogueDriver:
                 data = data[n:]
             except BlockingIOError:
                 time.sleep(0.01)
+        # Reset the idle clock so that a subsequent wait_stable() call waits
+        # for the game's response to THIS key, not for output that arrived
+        # before the key was sent (e.g. the dungeon draw that precedes each
+        # readchar() call in the command loop).
+        self._last_output_time = time.monotonic()
 
     def send_keys(self, keys, delay=0.0):
         """Send a sequence of keys, optionally waiting between each."""
