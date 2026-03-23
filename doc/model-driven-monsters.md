@@ -129,6 +129,10 @@ Local map (9x9, you are at centre marked 'M'):
 
 Walkable moves: {legal_moves_list}
 
+You are aggressive. Press the attack whenever there is a reasonable chance
+of killing the player, even if you risk dying in the process. Only retreat
+if your HP is very low AND the player is clearly winning.
+
 Reply with exactly one character from the walkable moves list.
 h=left  l=right  k=up  j=down  y=up-left  u=up-right  b=down-left  n=down-right  .=stay
 ```
@@ -142,7 +146,9 @@ flagged (but still recorded, with a `source: fallback` field).
 The fallback heuristic applies these prioritised rules:
 
 1. **Attack** — if player is adjacent, move onto player's cell.
-2. **Retreat** — if HP < 25 % and player is visible, maximise distance.
+2. **Retreat** — if HP < 15 % *and* player HP > monster HP (player is
+   clearly winning), maximise distance. Monsters are biased toward
+   aggression: they only flee when the situation is dire.
 3. **Flank** — if an ally is closer to the player, approach from the
    opposite side.
 4. **Chase** — A\* shortest path to player through walkable tiles.
@@ -293,12 +299,13 @@ AI component.
 
 ## Open Questions
 
-1. **How smart should the model be?** The LLM will naturally suggest
-   good tactical play. If every monster plays well the game may become
-   too hard. Options: sample from the softmax (temperature > 1) to add
-   variance; only apply `ISMODEL` to higher-level monsters; query the
-   LLM at a higher temperature during data collection to get more diverse
-   (and occasionally suboptimal) labels.
+1. **Aggression vs. difficulty balance.** Monsters are intentionally
+   biased toward aggression — they press the attack even at personal
+   risk. If the game feels unfair, the tuning knobs are: the retreat HP
+   threshold in `expert.py` (currently 15 %); the temperature used when
+   querying the LLM during data collection (higher temperature → more
+   variance, occasional suboptimal moves); and restricting `ISMODEL` to
+   higher dungeon levels so early floors remain approachable.
 
 2. **Player modelling?** Adding `player_hp_fraction`, `player_is_confused`,
    `player_has_bow` as scalar features is low-cost and would let the
