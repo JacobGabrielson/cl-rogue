@@ -1,42 +1,6 @@
-(in-package :cl-rogue)
-
-(eval-when (compile load)
-  (proclaim '(optimize (debug 3) (safety 3))))
-
-;; may have to run this by hand in the repl...
-(declaim (optimize (debug 3) (safety 3)))
-
-(defun compile-n-load (path)
-  (compile-file path)
-  (load path))
-
-(load "rogue.lisp") ; bootstrap
-(compile-n-load "rogue")
-(compile-n-load "vers")
-(compile-n-load "init")
-(compile-n-load "io")
-(compile-n-load "main")
-(compile-n-load "armor")
-(compile-n-load "chase")
-(compile-n-load "command")
-(compile-n-load "daemon")
-(compile-n-load "daemons")
-(compile-n-load "fight")
-(compile-n-load "misc")
-(compile-n-load "monsters")
-(compile-n-load "move")
-(compile-n-load "newlevel")
-(compile-n-load "options")
-(compile-n-load "pack")
-(compile-n-load "package")
-(compile-n-load "passages")
-(compile-n-load "potions")
-(compile-n-load "rings")
-(compile-n-load "rip")
-(compile-n-load "rogue")
-(compile-n-load "rooms")
-(compile-n-load "scrolls")
-(compile-n-load "sticks")
-(compile-n-load "things")
-(compile-n-load "weapons")
-(compile-n-load "wizard")
+(require :asdf)
+(pushnew *default-pathname-defaults* asdf:*central-registry* :test #'equal)
+(asdf:load-system :cl-rogue)
+(sb-ext:save-lisp-and-die "cl-rogue"
+                          :toplevel #'cl-rogue:rogue
+                          :executable t)
