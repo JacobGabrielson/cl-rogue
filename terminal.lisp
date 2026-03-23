@@ -7,6 +7,9 @@
 ;;;;
 ;;;; See doc/remove-curses.md for the full design rationale.
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require :sb-posix))
+
 (defpackage #:cl-charms/low-level
   (:use #:common-lisp)
   (:export
