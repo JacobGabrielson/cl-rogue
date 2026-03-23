@@ -242,12 +242,13 @@ AI component.
    add variance; only apply the model to higher-level monster types;
    reduce model quality deliberately via early stopping.
 
-2. **Full map vs local window?** Giving Claude the full 24×80 ASCII map
-   costs more tokens and may confuse it with irrelevant detail. The 9×9
-   window is cheaper and probably sufficient for tactical decisions, but
-   misses long-range coordination (e.g. funnelling the player toward other
-   monsters). Could use 9×9 for the model but give Claude the full map
-   during data collection for better labels.
+2. **Full map vs local window?** Start with the 9×9 local window. It is
+   cheaper in tokens, avoids confusing Claude with irrelevant distant
+   detail, and is sufficient for the tactical decisions that matter most
+   (step toward player, avoid walls, don't walk into another monster).
+   Long-range coordination (funnelling the player toward other monsters)
+   can be added later as extra scalar features (e.g. direction and
+   distance to the nearest ally) rather than by expanding the grid.
 
 3. **Player modelling?** If the model is trained only on monster state,
    it cannot learn to exploit the player's equipment or status effects
