@@ -94,7 +94,7 @@ def grid_window(snap, mr, mc, size=9):
             r, c = mr + dr, mc + dc
             if dr == 0 and dc == 0:
                 row.append('M')
-            elif 0 <= r < len(snap) and 0 <= c < len(snap[r]):
+            elif 1 <= r <= 22 and 0 <= c < len(snap[r]):
                 row.append(snap[r][c])
             else:
                 row.append(' ')
@@ -106,50 +106,57 @@ def grid_window(snap, mr, mc, size=9):
 
 _VALID_ACTIONS = set('hjklyubn.')
 
-_PROMPT_TEMPLATE = """\
-You are a {name} (type '{ch}') in a dungeon.
-Your position: ({mr},{mc}). HP: unknown (assume healthy unless retreating).
-The player (@) is at ({pr},{pc}), HP: {php:.0f}%.
-{n_allies} other monster(s) are nearby.
+_SYSTEM_PROMPT = (
+    "You control a monster in a dungeon game. "
+    "Respond with ONLY a single move character from the legal moves provided. "
+    "No words, no explanation — just one character."
+)
 
-Local map (9x9, you are at centre marked 'M'):
+_USER_PROMPT_TEMPLATE = """\
+You are a {name} ('{ch}'). You are aggressive — press the attack when there
+is a reasonable chance of killing the player. Only retreat if nearly dead
+AND the player is clearly winning.
+
+Player (@) is at ({pr},{pc}), HP {php:.0f}%. You are at ({mr},{mc}).
+{n_allies} ally monster(s) nearby.
+
+Map (9x9, you=M):
 {ascii_map}
 
-Walkable moves: {moves}
-
-You are aggressive. Press the attack whenever there is a reasonable chance
-of killing the player, even if you risk dying in the process. Only retreat
-if you are nearly dead AND the player is clearly winning.
-
-Reply with exactly one character from the walkable moves list.
-h=left  l=right  k=up  j=down  y=up-left  u=up-right  b=down-left  n=down-right  .=stay"""
+Legal moves: {moves}
+h=left l=right k=up j=down y=NW u=NE b=SW n=SE .=stay
+Move:"""
 
 
 def ollama_label(args, name, ch, mr, mc, pr, pc, php_frac, n_allies, window, moves):
-    """Query Ollama and return a valid action char, or None on failure."""
+    """Query Ollama via the chat API and return a valid action char, or None."""
     ascii_map = '\n'.join(window)
     moves_str = ' '.join(sorted(moves))
-    prompt = _PROMPT_TEMPLATE.format(
+    user_msg = _USER_PROMPT_TEMPLATE.format(
         name=name, ch=ch, mr=mr, mc=mc, pr=pr, pc=pc,
         php=php_frac * 100, n_allies=n_allies,
         ascii_map=ascii_map, moves=moves_str,
     )
     try:
         resp = requests.post(
-            f"{args.ollama}/api/generate",
+            f"{args.ollama}/api/chat",
             json={
                 "model": args.model,
-                "prompt": prompt,
                 "stream": False,
-                "options": {"temperature": 0.7, "num_predict": 8},
+                "options": {"temperature": 0.7, "num_predict": 4},
+                "messages": [
+                    {"role": "system", "content": _SYSTEM_PROMPT},
+                    {"role": "user",   "content": user_msg},
+                ],
             },
             timeout=60,
         )
         resp.raise_for_status()
-        text = resp.json().get("response", "").strip()
-        # Extract first valid action character
-        for char in text:
-            if char in _VALID_ACTIONS and char in moves:
+        text = resp.json().get("message", {}).get("content", "").strip()
+        # Scan from the end in case the model adds punctuation after the char.
+        moves_set = set(moves)
+        for char in reversed(text):
+            if char in _VALID_ACTIONS and char in moves_set:
                 return char
         return None
     except Exception as e:
@@ -161,21 +168,54 @@ def ollama_label(args, name, ch, mr, mc, pr, pc, php_frac, n_allies, window, mov
 
 _MOVE_KEYS = list('hjklyubn')
 _WALKABLE_PLAYER = frozenset('.#+%:!?*)]/=>~`^&{},')
+_HUNGER_WORDS = ('hungry', 'weak', 'faint')
 
 
-def player_move(snap, pr, pc, visited):
-    """Return a key for the player to send.
+def player_move(snap, pr, pc, visited, turn, player_state):
+    """Return a key (or keys) for the player.
 
-    Prefers unvisited walkable tiles to explore the map, and descends
-    stairs when adjacent. `visited` is a set of (r, c) the player has
-    already been to.
+    Implements a basic but effective survival strategy:
+      1. Eat food when hungry (avoids starvation death)
+      2. Attack adjacent monsters (fight back)
+      3. Pick up items on current cell (food, potions)
+      4. Descend stairs (progress levels for variety)
+      5. Explore unvisited walkable tiles
+
+    player_state is a mutable dict for inter-turn bookkeeping.
+    Returns a single key string.
     """
-    # Descend stairs if adjacent
+    msg = snap[0].lower()
+
+    # ── 1. Eat food if hungry ─────────────────────────────────────────────── #
+    # 'e' opens eat prompt; we follow with 'a' to eat first inventory item.
+    # Use a 2-step state machine so we don't flood the game with 'e' every turn.
+    if player_state.get('eating') == 'sent_e':
+        player_state['eating'] = None
+        return 'a'   # confirm eat first food item
+    if any(w in msg for w in _HUNGER_WORDS):
+        player_state['eating'] = 'sent_e'
+        return 'e'
+
+    # ── 2. Attack an adjacent monster ────────────────────────────────────── #
+    for d, (dr, dc) in DIRS.items():
+        if d == '.':
+            continue
+        nr, nc = pr + dr, pc + dc
+        if 0 <= nr < len(snap) and 0 <= nc < len(snap[nr]):
+            if snap[nr][nc].isupper():
+                return d   # bump into it to attack
+
+    # ── 3. Pick up item on current cell ──────────────────────────────────── #
+    if snap[pr][pc] in ':!?*)/]=':
+        return ','
+
+    # ── 4. Descend stairs if adjacent ────────────────────────────────────── #
     for r in range(max(1, pr - 1), min(23, pr + 2)):
         for c in range(max(0, pc - 1), min(80, pc + 2)):
             if snap[r][c] == '%' and (r != pr or c != pc):
                 return '>'
 
+    # ── 5. Explore unvisited walkable tiles ──────────────────────────────── #
     unvisited, walkable = [], []
     for key, (dr, dc) in DIRS.items():
         if key == '.':
@@ -201,7 +241,8 @@ def run_episode(args, episode_num, out_file):
     """Run one episode and write training examples to out_file."""
     binary = os.path.join(_HERE, '..', 'cl-rogue')
     n_examples = 0
-    n_fallback = 0
+    n_llm_attempts = 0
+    n_llm_fallback = 0
 
     with RogueDriver(binary, rows=24, cols=80) as driver:
         ok = driver.wait_stable(timeout=10.0)
@@ -211,6 +252,7 @@ def run_episode(args, episode_num, out_file):
             return 0, 0
 
         visited = set()
+        player_state = {}
         for turn in range(args.max_turns):
             snap = driver.snapshot()
 
@@ -229,7 +271,15 @@ def run_episode(args, episode_num, out_file):
             monsters = find_monsters(snap)
             monster_cells = {(r, c) for r, c, _ in monsters}
 
-            for mr, mc, ch in monsters:
+            # When using the LLM, sample at most one monster per turn to
+            # keep collection speed tractable on CPU.  The rest get the
+            # A* expert label.
+            if not args.no_llm and monsters:
+                llm_idx = random.randrange(len(monsters))
+            else:
+                llm_idx = -1
+
+            for idx, (mr, mc, ch) in enumerate(monsters):
                 allies = [(r, c) for r, c, _ in monsters if (r, c) != (mr, mc)]
                 n_allies = len(allies)
 
@@ -237,14 +287,20 @@ def run_episode(args, episode_num, out_file):
                 moves = legal_moves(snap, mr, mc, pr, pc)
 
                 action = None
-                source = 'llm'
+                source = 'expert'   # default for non-LLM-sampled monsters
 
-                if not args.no_llm:
+                if idx == llm_idx:
+                    n_llm_attempts += 1
                     name = monster_name(ch)
                     action = ollama_label(
                         args, name, ch, mr, mc, pr, pc,
                         php_frac, n_allies, window, moves,
                     )
+                    if action is not None:
+                        source = 'llm'
+                    else:
+                        n_llm_fallback += 1
+                        source = 'fallback'
 
                 if action is None:
                     action = choose_action(
@@ -253,8 +309,6 @@ def run_episode(args, episode_num, out_file):
                         player_hp_frac=php_frac,
                         allies=allies,
                     )
-                    source = 'fallback'
-                    n_fallback += 1
 
                 record = {
                     "episode": episode_num,
@@ -279,11 +333,11 @@ def run_episode(args, episode_num, out_file):
                 n_examples += 1
 
             # Advance the game with a player move
-            key = player_move(snap, pr, pc, visited)
+            key = player_move(snap, pr, pc, visited, turn, player_state)
             driver.send_key(key)
             driver.wait_stable(timeout=3.0)
 
-    return n_examples, n_fallback
+    return n_examples, (n_llm_attempts, n_llm_fallback)
 
 
 # ── Main ─────────────────────────────────────────────────────────────────── #
@@ -308,20 +362,25 @@ def main():
     os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
 
     total_examples = 0
-    total_fallback = 0
+    total_llm_attempts = 0
+    total_llm_fallback = 0
 
     with open(args.output, 'a') as out_file:
         for ep in range(args.episodes):
             print(f"Episode {ep + 1}/{args.episodes} ...", flush=True)
-            n, f = run_episode(args, ep, out_file)
+            n, (n_att, n_fail) = run_episode(args, ep, out_file)
             total_examples += n
-            total_fallback += f
-            fallback_pct = 100 * f / n if n else 0
-            print(f"  {n} examples, fallback rate {fallback_pct:.1f}%")
+            total_llm_attempts += n_att
+            total_llm_fallback += n_fail
+            if n_att:
+                pct = 100 * n_fail / n_att
+                print(f"  {n} examples  (LLM: {n_att - n_fail} ok, {n_fail} fallback = {pct:.0f}%)")
+            else:
+                print(f"  {n} examples  (expert-only)")
 
     print(f"\nDone. Total: {total_examples} examples written to {args.output}")
-    if total_examples and not args.no_llm:
-        pct = 100 * total_fallback / total_examples
+    if total_llm_attempts and not args.no_llm:
+        pct = 100 * total_llm_fallback / total_llm_attempts
         print(f"Overall LLM fallback rate: {pct:.1f}%  "
               f"({'OK' if pct < 20 else 'HIGH — consider a larger model'})")
 
