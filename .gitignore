@@ -3,3 +3,5 @@ cl-rogue
 driver/venv/
 __pycache__/
 training_data/
+model/*.ubj
+model/*_meta.json

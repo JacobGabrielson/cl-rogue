@@ -1,2 +1,5 @@
 pyte==0.8.2
 requests
+numpy
+xgboost
+scikit-learn
