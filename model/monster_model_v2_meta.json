@@ -1,0 +1,17 @@
+{
+  "action_order": [
+    "y",
+    "k",
+    "u",
+    "h",
+    ".",
+    "l",
+    "b",
+    "j",
+    "n"
+  ],
+  "n_features": 685,
+  "n_classes": 9,
+  "n_train": 173816,
+  "test_acc": 1.0
+}

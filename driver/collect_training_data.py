@@ -6,6 +6,12 @@ Drives cl-rogue headlessly, observes monster positions each turn, queries
 an Ollama LLM to label each monster's intended move, and writes
 (state, action) pairs as JSONL.
 
+HP augmentation (--augment, on by default):
+  For each observed game state, writes N extra copies with synthetic
+  monster_hp_frac and player_hp_frac values and re-labels them with the
+  expert.  This gives the model retreat and press-advantage examples
+  without needing to observe those situations in actual gameplay.
+
 Usage (from repo root, venv active):
     python driver/collect_training_data.py [options]
 
@@ -16,6 +22,7 @@ Options:
     --model NAME        Ollama model  (default: llama3.2:1b)
     --ollama URL        Ollama base URL  (default: http://localhost:11434)
     --no-llm            Use A* expert only — no Ollama queries
+    --no-augment        Disable HP augmentation (write one record per monster)
 """
 
 import argparse
@@ -33,6 +40,12 @@ sys.path.insert(0, _HERE)
 
 from rogue_driver import RogueDriver
 from expert import DIRS, legal_moves, choose_action
+
+# ── HP augmentation grid ─────────────────────────────────────────────────── #
+# Each observed state is re-labelled at every (monster_hp, player_hp) pair.
+# Expert retreat logic fires at mhp<0.15; press-advantage at php<0.5.
+_AUG_MONSTER_HP = [0.05, 0.10, 0.15, 0.20, 0.30, 0.50, 0.70, 1.00]
+_AUG_PLAYER_HP  = [0.20, 0.50, 0.80, 1.00]
 
 # ── Monster name table (A–Z, matching init.lisp order) ──────────────────── #
 MONSTER_NAMES = [
@@ -310,7 +323,7 @@ def run_episode(args, episode_num, out_file):
                         allies=allies,
                     )
 
-                record = {
+                base = {
                     "episode": episode_num,
                     "turn": turn,
                     "dungeon_level": level,
@@ -322,15 +335,37 @@ def run_episode(args, episode_num, out_file):
                     "pc": pc,
                     "player_hp": hp,
                     "player_max_hp": max_hp,
-                    "player_hp_frac": round(php_frac, 3),
                     "n_allies": n_allies,
                     "grid_window": window,
                     "legal_moves": moves,
-                    "action": action,
-                    "source": source,
                 }
+
+                # ── Original observed record (LLM or expert label) ───────── #
+                record = dict(base,
+                              player_hp_frac=round(php_frac, 3),
+                              monster_hp_frac=1.0,
+                              action=action,
+                              source=source)
                 out_file.write(json.dumps(record) + '\n')
                 n_examples += 1
+
+                # ── HP-augmented copies (expert labels at synthetic HP) ───── #
+                if args.augment:
+                    for mhp in _AUG_MONSTER_HP:
+                        for php_aug in _AUG_PLAYER_HP:
+                            aug_action = choose_action(
+                                snap, mr, mc, pr, pc,
+                                monster_hp_frac=mhp,
+                                player_hp_frac=php_aug,
+                                allies=allies,
+                            )
+                            aug = dict(base,
+                                       player_hp_frac=round(php_aug, 3),
+                                       monster_hp_frac=round(mhp, 3),
+                                       action=aug_action,
+                                       source='expert_aug')
+                            out_file.write(json.dumps(aug) + '\n')
+                            n_examples += 1
 
             # Advance the game with a player move
             key = player_move(snap, pr, pc, visited, turn, player_state)
@@ -357,7 +392,15 @@ def main():
                         help='Ollama base URL (default: http://localhost:11434)')
     parser.add_argument('--no-llm',    action='store_true',
                         help='Use A* expert only, skip Ollama queries')
+    parser.add_argument('--no-augment', action='store_true',
+                        help='Disable HP augmentation (one record per monster)')
     args = parser.parse_args()
+    args.augment = not args.no_augment
+
+    if args.augment:
+        aug_factor = len(_AUG_MONSTER_HP) * len(_AUG_PLAYER_HP) + 1
+        print(f"HP augmentation ON: {aug_factor}x records per monster observation "
+              f"({len(_AUG_MONSTER_HP)} mHP × {len(_AUG_PLAYER_HP)} pHP + 1 observed)")
 
     os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
 

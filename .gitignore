@@ -7,3 +7,5 @@ model/*.ubj
 model/*_meta.json
 !model/monster_model_combined.ubj
 !model/monster_model_combined_meta.json
+!model/monster_model_v2.ubj
+!model/monster_model_v2_meta.json

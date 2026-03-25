@@ -33,7 +33,7 @@ from train_model import featurize
 import xgboost as xgb
 
 DEFAULT_SOCK  = '/tmp/cl-rogue-model.sock'
-DEFAULT_MODEL = os.path.join(_REPO, 'model', 'monster_model_combined.ubj')
+DEFAULT_MODEL = os.path.join(_REPO, 'model', 'monster_model_v2.ubj')
 
 ACTION_ORDER = ['y', 'k', 'u', 'h', '.', 'l', 'b', 'j', 'n']
 _STAY_IDX    = 4   # index of '.' in ACTION_ORDER

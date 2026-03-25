@@ -72,8 +72,12 @@ def tile_class(ch):
 #   monster HP fraction           =    1
 #   n_allies (norm.)              =    1
 #   player visible in window      =    1
+#   monster_is_hurt  (mhp<0.33)   =    1   ← new
+#   monster_is_crit  (mhp<0.15)   =    1   ← new
+#   player_is_hurt   (php<0.50)   =    1   ← new
+#   player_is_weak   (php<0.25)   =    1   ← new
 #                                 -------
-#                                   681
+#                                   685
 
 _MAP_DIAG = (24**2 + 80**2) ** 0.5   # ≈ 83, used to normalise distance
 
@@ -115,16 +119,24 @@ def featurize(record):
         feats.extend([0.0, 0.0])
 
     # Player HP fraction
-    feats.append(float(record.get('player_hp_frac', 1.0)))
+    php = float(record.get('player_hp_frac', 1.0))
+    feats.append(php)
 
-    # Monster HP fraction (1.0 for all current data; placeholder for future)
-    feats.append(float(record.get('monster_hp_frac', 1.0)))
+    # Monster HP fraction
+    mhp = float(record.get('monster_hp_frac', 1.0))
+    feats.append(mhp)
 
     # n_allies (normalised; cap at 8)
     feats.append(min(record.get('n_allies', 0) / 8.0, 1.0))
 
     # Player visible in window
     feats.append(1.0 if any('@' in row for row in window) else 0.0)
+
+    # ── HP indicator booleans (make the retreat/press signal explicit) ──── #
+    feats.append(1.0 if mhp < 0.33 else 0.0)   # monster is hurt
+    feats.append(1.0 if mhp < 0.15 else 0.0)   # monster is critical
+    feats.append(1.0 if php < 0.50 else 0.0)   # player is hurt
+    feats.append(1.0 if php < 0.25 else 0.0)   # player is weak
 
     return np.array(feats, dtype=np.float32)
 
@@ -180,8 +192,9 @@ def train(args):
         'objective':        'multi:softmax',
         'num_class':        N_CLASSES,
         'eval_metric':      'merror',
-        'eta':              0.1,
-        'max_depth':        6,
+        'eta':              0.05,   # lower → more rounds but better generalisation
+        'max_depth':        7,      # one deeper to capture HP × position interactions
+        'min_child_weight': 3,      # avoid over-fitting on rare HP levels
         'subsample':        0.8,
         'colsample_bytree': 0.8,
         'seed':             args.seed,
@@ -196,8 +209,8 @@ def train(args):
         num_boost_round=args.rounds,
         evals=[(dtrain, 'train'), (dval, 'val')],
         evals_result=evals_result,
-        early_stopping_rounds=30,
-        verbose_eval=50,
+        early_stopping_rounds=40,
+        verbose_eval=100,
     )
 
     # ── Evaluation ──────────────────────────────────────────────────────── #
@@ -288,7 +301,7 @@ def main():
     parser.add_argument('--model',      default='model/monster_model.ubj')
     parser.add_argument('--val-split',  type=float, default=0.1)
     parser.add_argument('--test-split', type=float, default=0.1)
-    parser.add_argument('--rounds',     type=int,   default=300)
+    parser.add_argument('--rounds',     type=int,   default=600)
     parser.add_argument('--seed',       type=int,   default=42)
     args = parser.parse_args()
     train(args)
