@@ -81,6 +81,64 @@ Fix: detect code 10 in `win-put-char`, increment `cursor-y`, reset `cursor-x` to
 | `passages.lisp` | Level passage generation (`do-passages`) |
 | `rogue.lisp` | Shared constants, structs, and utility macros |
 
+## Model-Driven Monsters (branch: `feature/model-driven-monsters`)
+
+### Overview
+Phase 1–4 complete. All monsters use an XGBoost classifier for movement decisions, with fallback to the original A* chase when the server is unavailable.
+
+### Components
+
+| File | Purpose |
+|------|---------|
+| `driver/expert.py` | A* pathfinder + tactical rules; expert labels + fallback |
+| `driver/collect_training_data.py` | Self-play + Ollama LLM labeller → JSONL |
+| `driver/train_model.py` | Feature engineering + XGBoost training |
+| `driver/model_server.py` | Unix socket inference server; prints per-query logs |
+| `driver/observe.py` | Headless observer — prints ASCII frames when monsters visible |
+| `model-move.lisp` | Lisp socket client; builds JSON, sends/receives 1-byte action |
+| `model/monster_model_combined.ubj` | Trained model — 6,935 examples, 89.5% test accuracy |
+
+### How to run
+```bash
+# Activate venv (repo root)
+source driver/venv/bin/activate
+
+# Start inference server (keep running alongside the game)
+python driver/model_server.py
+
+# Observe AI behaviour headlessly
+python driver/observe.py --turns 80 --monsters
+
+# Play normally — monsters auto-connect to server on first move
+./cl-rogue
+```
+
+### Architecture
+- Socket: `/tmp/cl-rogue-model.sock` (Unix stream)
+- Protocol: JSON line → 1-byte action index (0–8 = y k u h . l b j n)
+- Monster max HP stored in `thing-t-reserved` (set at spawn in `new-monster`)
+- `ISMODEL = #o0200000` flag set on all new monsters
+
+### Behaviour overrides in model-move.lisp
+- Monster HP < 15% of max → return nil (fall back to A* retreat logic)
+- Model predicts stay (4) + player within 10 tiles → return nil (A* chases)
+
+### Known limitations / training data issues
+- Model was trained on 100% HP monsters only, so `monster_hp_frac` has
+  little effect on model output (overrides compensate for extreme cases)
+- Model has ~10% label noise from 1B LLM; occasionally picks non-optimal
+  diagonal when straight move would be better
+- Sleeping monsters (ISRUN not set) never call do-chase at all — the model
+  only activates for monsters that have already spotted the player. This
+  is vanilla rogue behaviour, not a model bug.
+- Player HP fraction is a feature but the model didn't see much variation
+  in training data, so monsters don't react strongly to wounded players
+
+### Retraining ideas (future)
+- Collect data with varying monster HP (damage them before labelling)
+- More retreat examples (LLM instructed to flee when mhp < 0.3)
+- Batch inference to avoid per-monster socket round-trips (~3.6ms each)
+
 ## Known Gotchas
 
 - `define-resettable` creates params with a stored lambda resetter; `reset-rogue-symbols` re-initializes all of them. If a resetter returns the same frozen object (e.g. a literal), mutations to it will fail after image save.
