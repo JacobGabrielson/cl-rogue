@@ -9,6 +9,11 @@
 ;;;;
 ;;;; Action indices match ACTION_ORDER in train_model.py:
 ;;;;   0=y  1=k  2=u  3=h  4=.  5=l  6=b  7=j  8=n
+;;;;
+;;;; Behaviour overrides (applied after model prediction):
+;;;;   • monster HP < 15% of max  → return NIL (fall back to A* retreat)
+;;;;   • model returns stay ('.')  and player is within 10 tiles → return NIL
+;;;;     (A* will chase instead)
 
 (in-package :cl-rogue)
 
@@ -85,9 +90,9 @@
                ((and (= dr 4) (= dc 4)) #\M)
                ;; In-bounds dungeon cell (rows 1–22, cols 0–79)
                ((and (>= r 1) (<= r 22) (>= c 0) (< c 80))
-                (let* ((raw (winat r c))
+                (let* ((raw  (winat r c))
                        (code (if (characterp raw) (char-code raw) 32)))
-                  ;; Clamp to printable ASCII to avoid encoding surprises
+                  ;; Clamp to printable ASCII
                   (if (and (>= code 32) (< code 128))
                       (code-char code)
                       #\Space)))
@@ -108,6 +113,15 @@
               (t             (write-char c out)))))
     (write-char #\" out)))
 
+(defun model-monster-hp-frac (th)
+  "Return monster current HP / max HP as a float in [0,1].
+  Uses THING-T-RESERVED as the max HP stored at spawn time."
+  (let ((cur (stats-s-hpt (thing-t-stats th)))
+        (mx  (thing-t-reserved th)))
+    (if (plusp mx)
+        (float (/ cur mx))
+        1.0)))
+
 (defun model-build-json (th)
   "Build the JSON request line for monster TH."
   (let* ((pos      (thing-t-pos th))
@@ -118,16 +132,17 @@
          (php      (if (plusp max-hp)
                        (float (/ (stats-s-hpt pstats) max-hp))
                        1.0))
+         (mhp      (model-monster-hp-frac th))
          (n-allies (max 0 (1- (length mlist))))
          (window   (model-build-grid-window mr mc))
          (mtype    (string (thing-t-type th))))
     (format nil
             "{\"monster_type\":~a,\"mr\":~d,\"mc\":~d,\"pr\":~d,\"pc\":~d,\
-\"player_hp_frac\":~,3f,\"monster_hp_frac\":1.0,\"n_allies\":~d,\
+\"player_hp_frac\":~,3f,\"monster_hp_frac\":~,3f,\"n_allies\":~d,\
 \"grid_window\":[~{~a~^,~}]}"
             (model-json-string mtype)
             mr mc pr pc
-            php
+            php mhp
             n-allies
             (mapcar #'model-json-string window))))
 
@@ -149,16 +164,37 @@
         nil))))
 
 (defun model-next-coord (th)
-  "Return the next COORD for model-driven monster TH, or NIL if the
-  model server is unavailable (causing fallback to normal A* chase)."
+  "Return the next COORD for model-driven monster TH, or NIL to fall
+  back to normal A* chase.
+
+  Returns NIL in two override cases:
+    1. Monster HP < 15% of max  (A* retreat logic handles it better)
+    2. Model says stay + player within 10 tiles  (A* will keep pressure on)"
+  ;; Override 1: badly wounded → let A* retreat
+  (let ((mhp-frac (model-monster-hp-frac th)))
+    (when (< mhp-frac 0.15)
+      (return-from model-next-coord nil)))
+
+  ;; Query model
   (let ((idx (model-query th)))
-    (when (and idx (< idx 9))
-      (let* ((delta (aref *model-action-deltas* idx))
-             (dr    (car delta))
-             (dc    (cdr delta))
-             (pos   (thing-t-pos th))
-             (ny    (+ (coord-y pos) dr))
-             (nx    (+ (coord-x pos) dc)))
-        ;; Only return coord if still within dungeon bounds
-        (when (and (>= ny 1) (<= ny 22) (>= nx 0) (< nx 80))
-          (make-coord :y ny :x nx))))))
+    (unless (and idx (< idx 9))
+      (return-from model-next-coord nil))
+
+    ;; Override 2: model says stay, but player is reachable → let A* chase
+    (when (= idx 4)
+      (let* ((pos  (thing-t-pos th))
+             (dist (+ (abs (- hero.y (coord-y pos)))
+                      (abs (- hero.x (coord-x pos))))))
+        (when (<= dist 10)
+          (return-from model-next-coord nil))))
+
+    ;; Map to coord
+    (let* ((delta (aref *model-action-deltas* idx))
+           (dr    (car delta))
+           (dc    (cdr delta))
+           (pos   (thing-t-pos th))
+           (ny    (+ (coord-y pos) dr))
+           (nx    (+ (coord-x pos) dc)))
+      ;; Only return coord if within dungeon bounds
+      (when (and (>= ny 1) (<= ny 22) (>= nx 0) (< nx 80))
+        (make-coord :y ny :x nx)))))

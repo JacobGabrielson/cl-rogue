@@ -31,15 +31,17 @@ the monster."
         (thing-t-oldch tp) (rogue-mvwinch cw (coord-y cp) (coord-x cp)))
   (rogue-mvwaddch mw (coord-y cp) (coord-x cp) (thing-t-type tp))
   (let ((mp (char-monster (thing-t-type tp))))
-    (setf (stats-s-hpt (thing-t-stats tp)) (roll (stats-s-lvl (monster-m-stats mp)) 8)
-          (stats-s-lvl (thing-t-stats tp)) (stats-s-lvl (monster-m-stats mp))
-          (stats-s-arm (thing-t-stats tp)) (stats-s-arm (monster-m-stats mp))
-          (stats-s-dmg (thing-t-stats tp)) (copy-seq (stats-s-dmg (monster-m-stats mp)))
-          (stats-s-exp (thing-t-stats tp)) (stats-s-exp (monster-m-stats mp))
-          (str-t-st-str (stats-s-str (thing-t-stats tp))) 10
-          (thing-t-flags tp) (monster-m-flags mp)
-          (thing-t-turn tp) t
-          (thing-t-pack tp) nil)
+    (let ((starting-hp (roll (stats-s-lvl (monster-m-stats mp)) 8)))
+      (setf (stats-s-hpt (thing-t-stats tp)) starting-hp
+            (thing-t-reserved tp) starting-hp         ; store max HP for model
+            (stats-s-lvl (thing-t-stats tp)) (stats-s-lvl (monster-m-stats mp))
+            (stats-s-arm (thing-t-stats tp)) (stats-s-arm (monster-m-stats mp))
+            (stats-s-dmg (thing-t-stats tp)) (copy-seq (stats-s-dmg (monster-m-stats mp)))
+            (stats-s-exp (thing-t-stats tp)) (stats-s-exp (monster-m-stats mp))
+            (str-t-st-str (stats-s-str (thing-t-stats tp))) 10
+            (thing-t-flags tp) (monster-m-flags mp)
+            (thing-t-turn tp) t
+            (thing-t-pack tp) nil))
     ;; Enable model-driven AI for all monsters
     (logior! (thing-t-flags tp) ISMODEL)
     (when (iswearing R-AGGR)
