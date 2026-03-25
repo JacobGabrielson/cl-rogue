@@ -20,6 +20,7 @@
 	       (:file "io")
 	       (:file "save")
 	       (:file "armor")
+	       (:file "model-move")
 	       (:file "chase")
 	       (:file "command")
 	       (:file "daemon")

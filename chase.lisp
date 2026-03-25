@@ -46,13 +46,22 @@
                 mindist dist))))
     ;; THIS now contains what we want to run to this time so we run to
     ;; it.  If we hit it we either want to fight it or stop running.
-    (if (not (chase th this))
-        (if (equalp this hero)
-            (return-from do-chase (attack th))
-            (unless (eql (thing-t-type th) #\F)
-              (setf stoprun t)))
-        (when (eql (thing-t-type th) #\F)
-          (return-from do-chase 0)))
+    ;;
+    ;; Model-AI path: if ISMODEL is set and the server is available,
+    ;; set CH-RET directly and skip the normal A* chase.
+    (let ((used-model (and (on th ISMODEL)
+                           (let ((mc (model-next-coord th)))
+                             (when mc
+                               (setf ch-ret mc)
+                               t)))))
+      (unless used-model
+        (if (not (chase th this))
+            (if (equalp this hero)
+                (return-from do-chase (attack th))
+                (unless (eql (thing-t-type th) #\F)
+                  (setf stoprun t)))
+            (when (eql (thing-t-type th) #\F)
+              (return-from do-chase 0)))))
     ;; In C rogue, t_dest = &hero is a live pointer so chase() sees
     ;; distance 0 when the monster is adjacent to the (updated) hero and
     ;; attacks via the equalp check above.  In CL, do-move replaces the

@@ -92,6 +92,7 @@
 (defconstant ISMANY #o0040000)
 (defconstant ISSLOW #o0040000)
 (defconstant ISHASTE #o0100000)
+(defconstant ISMODEL #o0200000)         ; Use model-driven AI (see model-move.lisp)
 
 ;;; Potion types
 (defconstant P-CONFUSE 0)

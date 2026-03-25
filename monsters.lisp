@@ -40,6 +40,8 @@ the monster."
           (thing-t-flags tp) (monster-m-flags mp)
           (thing-t-turn tp) t
           (thing-t-pack tp) nil)
+    ;; Enable model-driven AI for all monsters
+    (logior! (thing-t-flags tp) ISMODEL)
     (when (iswearing R-AGGR)
       (runto cp hero))
     (when (eql type #\M)
