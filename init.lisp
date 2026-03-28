@@ -116,7 +116,7 @@
    (mapcar #'(lambda (l)
                (apply #'monmake l))
            `(("giant ant" 0 (,ISMEAN) 10 2 3 "1d6")
-             ("bat" 0 (0) 1 1 3 "1d2" )
+             ("bat" 0 (,ISRUN ,ISMEAN) 1 1 3 "1d2" )
              ("centaur" 15 (0) 15 4 4 "1d6/1d6")
              ("dragon" 100 (,ISGREED) 9000 10 -1 "1d8/1d8/3d10")
              ("floating eye" 0 (0) 5 1 9 "0d0")

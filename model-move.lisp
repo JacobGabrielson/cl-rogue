@@ -36,12 +36,17 @@
 (defparameter *model-socket-path* "/tmp/cl-rogue-model.sock")
 
 (defvar *model-socket* nil
-  "Persistent SB-BSD-SOCKETS:LOCAL-SOCKET connection, or NIL.")
+  "Persistent SB-BSD-SOCKETS:LOCAL-SOCKET, or NIL.")
+(defvar *model-stream* nil
+  "Bivalent stream wrapping *model-socket*, or NIL.")
 
 ;;; ── Connection management ─────────────────────────────────────────────── ;;;
 
 (defun model-disconnect ()
   "Close the model-server connection."
+  (when *model-stream*
+    (ignore-errors (close *model-stream*))
+    (setf *model-stream* nil))
   (when *model-socket*
     (ignore-errors (sb-bsd-sockets:socket-close *model-socket*))
     (setf *model-socket* nil)))
@@ -54,6 +59,11 @@
       (let ((sock (make-instance 'sb-bsd-sockets:local-socket :type :stream)))
         (sb-bsd-sockets:socket-connect sock *model-socket-path*)
         (setf *model-socket* sock)
+        (setf *model-stream*
+              (sb-bsd-sockets:socket-make-stream
+               sock :input t :output t
+               :element-type :default
+               :buffering :full))
         t)
     (error () nil)))
 
@@ -61,17 +71,14 @@
 
 (defun model-send (json-str)
   "Send JSON string + newline to the model server."
-  (let ((bytes (map '(vector (unsigned-byte 8))
-                    #'char-code
-                    (concatenate 'string json-str (string #\Newline)))))
-    (sb-bsd-sockets:socket-send *model-socket* bytes (length bytes))))
+  (write-string json-str *model-stream*)
+  (write-char #\Newline *model-stream*)
+  (finish-output *model-stream*))
 
 (defun model-recv-byte ()
   "Block until the model server sends 1 byte; return it as integer or NIL."
-  (let ((buf (make-array 1 :element-type '(unsigned-byte 8) :initial-element 0)))
-    (let ((n (sb-bsd-sockets:socket-receive *model-socket* buf 1)))
-      (when (and n (= n 1))
-        (aref buf 0)))))
+  (let ((byte (read-byte *model-stream* nil nil)))
+    byte))
 
 ;;; ── Feature-state builder ─────────────────────────────────────────────── ;;;
 
@@ -88,6 +95,9 @@
              (cond
                ;; Monster's own cell
                ((and (= dr 4) (= dc 4)) #\M)
+               ;; Player's cell — winat reads stdscr which has floor,
+               ;; but training data had '@' from the VT100 screen.
+               ((and (= r hero.y) (= c hero.x)) #\@)
                ;; In-bounds dungeon cell (rows 1–22, cols 0–79)
                ((and (>= r 1) (<= r 22) (>= c 0) (< c 80))
                 (let* ((raw  (winat r c))
@@ -137,8 +147,8 @@
          (window   (model-build-grid-window mr mc))
          (mtype    (string (thing-t-type th))))
     (format nil
-            "{\"monster_type\":~a,\"mr\":~d,\"mc\":~d,\"pr\":~d,\"pc\":~d,\
-\"player_hp_frac\":~,3f,\"monster_hp_frac\":~,3f,\"n_allies\":~d,\
+            "{\"monster_type\":~a,\"mr\":~d,\"mc\":~d,\"pr\":~d,\"pc\":~d,~
+\"player_hp_frac\":~,3f,\"monster_hp_frac\":~,3f,\"n_allies\":~d,~
 \"grid_window\":[~{~a~^,~}]}"
             (model-json-string mtype)
             mr mc pr pc
@@ -152,9 +162,9 @@
   "Query the model server for an action index (0–8).
   Lazily connects on first call; reconnects after errors.
   Returns NIL when the server is unavailable."
-  (unless *model-socket*
+  (unless *model-stream*
     (model-connect))
-  (when *model-socket*
+  (when *model-stream*
     (handler-case
         (progn
           (model-send (model-build-json th))
@@ -167,7 +177,7 @@
   "Return the next COORD for model-driven monster TH, or NIL to fall
   back to normal A* chase.
 
-  Returns NIL in two override cases:
+  Returns NIL in override cases:
     1. Monster HP < 15% of max  (A* retreat logic handles it better)
     2. Model says stay + player within 10 tiles  (A* will keep pressure on)"
   ;; Override 1: badly wounded → let A* retreat
@@ -188,13 +198,41 @@
         (when (<= dist 10)
           (return-from model-next-coord nil))))
 
-    ;; Map to coord
+    ;; Map to coord, validating it's a legal move
     (let* ((delta (aref *model-action-deltas* idx))
            (dr    (car delta))
            (dc    (cdr delta))
            (pos   (thing-t-pos th))
            (ny    (+ (coord-y pos) dr))
            (nx    (+ (coord-x pos) dc)))
-      ;; Only return coord if within dungeon bounds
+      ;; Only return coord if in-bounds, walkable, and diagonal-ok
       (when (and (>= ny 1) (<= ny 22) (>= nx 0) (< nx 80))
-        (make-coord :y ny :x nx)))))
+        (let ((dest (make-coord :y ny :x nx)))
+          (if (and (diag-ok pos dest)
+                   (or (equalp dest hero)         ; attacking hero is always ok
+                       (step-ok (winat ny nx))))
+              dest
+              nil))))))
+
+;;; ── Debug state dump ────────────────────────────────────────────────── ;;;
+
+(defparameter *state-dump-path* "/tmp/cl-rogue-state.log")
+
+(defun dump-game-state ()
+  "Write player + monster positions to *state-dump-path* (overwritten each turn)."
+  (ignore-errors
+    (with-open-file (out *state-dump-path* :direction :output
+                                           :if-exists :supersede
+                                           :if-does-not-exist :create)
+      (format out "player ~d,~d  hp=~d/~d  level=~d~%"
+              hero.y hero.x
+              (stats-s-hpt pstats) max-hp level)
+      (dolist (tp mlist)
+        (let* ((pos  (thing-t-pos tp))
+               (my   (coord-y pos))
+               (mx   (coord-x pos))
+               (dist (+ (abs (- hero.y my)) (abs (- hero.x mx))))
+               (run  (if (on tp ISRUN) "RUN" "   "))
+               (mdl  (if (on tp ISMODEL) "MDL" "   ")))
+          (format out "  ~a ~a ~a @~d,~d  dist=~d~%"
+                  (thing-t-type tp) run mdl my mx dist))))))

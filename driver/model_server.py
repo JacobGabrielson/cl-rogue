@@ -19,6 +19,7 @@ Usage (from repo root, venv active):
 
 import argparse
 import json
+import logging
 import os
 import signal
 import socket
@@ -79,6 +80,9 @@ def fmt_rec(rec):
             f"dist={dist}  pHP={php:.0%}  mHP={mhp:.0%}")
 
 
+log = logging.getLogger('model_server')
+
+
 def handle_client(conn, model):
     """Service one client connection until it closes."""
     n_queries = 0
@@ -101,18 +105,22 @@ def handle_client(conn, model):
                     idx, act   = predict_one(model, rec)
                     conn.sendall(bytes([idx]))
                     n_queries += 1
-                    print(f"  [{n_queries:4d}] {fmt_rec(rec)}  → {act!r} (idx={idx})",
-                          flush=True)
+                    grid = rec.get('grid_window', [])
+                    log.info("[%4d] %s  → %r (idx=%d)",
+                             n_queries, fmt_rec(rec), act, idx)
+                    for i, row in enumerate(grid):
+                        tag = ' >>> ' if i == 4 else '     '
+                        log.info("  %s|%s|", tag, row)
                 except Exception as e:
                     conn.sendall(bytes([_STAY_IDX]))
-                    print(f"  [ERR ] {e}", flush=True)
+                    log.error("[ERR ] %s  RAW: %r", e, line[:200])
     except Exception:
         pass
     finally:
         elapsed = time.monotonic() - t_start
-        print(f"  — {n_queries} queries in {elapsed:.1f}s "
-              f"({elapsed/max(n_queries,1)*1000:.1f} ms/query avg)",
-              flush=True)
+        log.info("— %d queries in %.1fs (%.1f ms/query avg)",
+                 n_queries, elapsed,
+                 elapsed / max(n_queries, 1) * 1000)
         try:
             conn.close()
         except Exception:
@@ -127,7 +135,20 @@ def main():
                         help=f'Unix socket path (default: {DEFAULT_SOCK})')
     parser.add_argument('--model',  default=DEFAULT_MODEL,
                         help='XGBoost model file')
+    parser.add_argument('--log', default=None,
+                        help='Log file path (default: stdout only)')
     args = parser.parse_args()
+
+    # Set up logging to stdout + optional file
+    handlers = [logging.StreamHandler()]
+    if args.log:
+        handlers.append(logging.FileHandler(args.log, mode='w'))
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(message)s',
+        datefmt='%H:%M:%S',
+        handlers=handlers,
+    )
 
     # Clean up stale socket
     try:
@@ -135,14 +156,16 @@ def main():
     except FileNotFoundError:
         pass
 
-    print(f'Loading model from {args.model} …', flush=True)
+    log.info('Loading model from %s …', args.model)
     model = load_model(args.model)
-    print('Model loaded.', flush=True)
+    log.info('Model loaded.')
 
     srv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     srv.bind(args.socket)
     srv.listen(1)
-    print(f'Listening on {args.socket}', flush=True)
+    log.info('Listening on %s', args.socket)
+    if args.log:
+        log.info('Logging to %s', args.log)
 
     def _shutdown(sig, frame):
         srv.close()
@@ -158,9 +181,9 @@ def main():
     while True:
         try:
             conn, _ = srv.accept()
-            print('── Client connected ──────────────────────────────', flush=True)
+            log.info('── Client connected ──────────────────────────────')
             handle_client(conn, model)
-            print('── Client disconnected ───────────────────────────', flush=True)
+            log.info('── Client disconnected ───────────────────────────')
         except OSError:
             break
 

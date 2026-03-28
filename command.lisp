@@ -226,6 +226,7 @@
       (look nil)
       (do-daemons AFTER)
       (do-fuses AFTER)
+      (dump-game-state)
       (if (isring LEFT R-SEARCH)
           (rogue-search)
           (when (and (isring LEFT R-TELEPORT) (< (rnd 100) 2))
