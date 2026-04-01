@@ -214,6 +214,45 @@
               dest
               nil))))))
 
+;;; ── Training data collection ─────────────────────────────────────────── ;;;
+;;; Records (state, action) pairs from live gameplay using the same feature
+;;; builder as inference, ensuring training/inference feature parity.
+
+(defparameter *collect-training-data* t
+  "When non-nil, record monster (state, action) pairs during gameplay.")
+(defparameter *training-data-path* "/tmp/cl-rogue-training.jsonl")
+(defvar *training-data-stream* nil)
+
+(defparameter *delta-to-action*
+  '(((-1 . -1) . "y") ((-1 . 0) . "k") ((-1 . 1) . "u")
+    (( 0 . -1) . "h") (( 0 . 0) . ".") (( 0 . 1) . "l")
+    ((1 . -1) . "b")  ((1 . 0) . "j")  ((1 . 1) . "n")))
+
+(defun training-data-ensure-stream ()
+  "Open the training data file for appending (lazy open)."
+  (unless (and *training-data-stream*
+               (open-stream-p *training-data-stream*))
+    (setf *training-data-stream*
+          (open *training-data-path* :direction :output
+                                     :if-exists :append
+                                     :if-does-not-exist :create
+                                     :external-format :utf-8))))
+
+(defun collect-training-example (json-state old-pos new-pos)
+  "Append one training example: the JSON state + the action actually taken.
+  JSON-STATE is the model-build-json output (without action field).
+  OLD-POS / NEW-POS are monster coords before/after the move."
+  (ignore-errors
+    (let* ((dy (- (coord-y new-pos) (coord-y old-pos)))
+           (dx (- (coord-x new-pos) (coord-x old-pos)))
+           (act (cdr (assoc (cons dy dx) *delta-to-action* :test #'equal))))
+      (when act
+        (training-data-ensure-stream)
+        ;; Splice "action":"X" into the JSON before the closing }
+        (let ((base (string-right-trim "}" json-state)))
+          (format *training-data-stream* "~a,\"action\":\"~a\"}~%" base act)
+          (finish-output *training-data-stream*))))))
+
 ;;; ── Debug state dump ────────────────────────────────────────────────── ;;;
 
 (defparameter *state-dump-path* "/tmp/cl-rogue-state.log")

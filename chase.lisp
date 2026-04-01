@@ -20,13 +20,19 @@
 
 (defun do-chase (th)
   "Make one thing chase another."
-  (let ((rer (roomin (thing-t-pos th))) ; room of chaser, room of chasee 
+  (let ((rer (roomin (thing-t-pos th))) ; room of chaser, room of chasee
         (ree (roomin (thing-t-dest th)))
-        (mindist 32767) 
+        (mindist 32767)
         dist
-        (stoprun nil)                   ; t means we are there 
+        (stoprun nil)                   ; t means we are there
         sch
-        (this (thing-t-dest th)))  ; temporary destination for chaser 
+        (this (thing-t-dest th))  ; temporary destination for chaser
+        ;; Training data collection: capture pre-move state for every
+        ;; running monster so we get examples of all movement patterns.
+        (collect-json (when (and *collect-training-data*
+                                 (on th ISMODEL))
+                        (model-build-json th)))
+        (old-pos (copy-coord (thing-t-pos th))))
     ;; We don't count doors as inside rooms for this routine
     (when (eql (rogue-mvwinch cl-charms/low-level:*stdscr* (coord-y (thing-t-pos th)) (coord-x (thing-t-pos th)))
                DOOR)
@@ -96,6 +102,9 @@
     (rogue-mvwaddch mw (coord-y (thing-t-pos th)) (coord-x (thing-t-pos th)) #\Space)
     (rogue-mvwaddch mw (coord-y ch-ret) (coord-x ch-ret) (thing-t-type th))
     (setf (thing-t-pos th) ch-ret)
+    ;; Record training example if collecting
+    (when collect-json
+      (collect-training-example collect-json old-pos ch-ret))
     ;; And stop running if need be.
     (when (and stoprun
                (equalp (thing-t-pos th) (thing-t-dest th)))
